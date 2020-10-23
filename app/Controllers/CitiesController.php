@@ -1,40 +1,31 @@
 <?php  namespace App\Controllers;
 
-use App\Models\PersonModel;
 
 use App\Models\CountryModel;
 
 use App\Models\CityModel;
-use App\Entities\Person;
+use App\Entities\City;
 
-class People extends GoBaseController { 
+class CitiesController extends GoBaseController { 
 
-    protected static $primaryModelName = 'PersonModel';
-    protected static $singularObjectName = 'Person';
-    protected static $singularObjectNameCc = 'person';
-    protected static $pluralObjectName = 'People';
-    protected static $pluralObjectNameCc = 'People';
+    protected static $primaryModelName = 'CityModel';
+    protected static $singularObjectName = 'City';
+    protected static $singularObjectNameCc = 'city';
+    protected static $pluralObjectName = 'Cities';
+    protected static $pluralObjectNameCc = 'cities';
 
-    protected static $viewPath = 'personViews/';
+    protected static $viewPath = 'cityViews/';
 
     protected $formValidationRules = [
-		'first_name' => 'trim|required|max_length[40]',
-		'score' => 'decimal|permit_empty',
-		'photo' => 'trim|max_length[255]',
-		'phone_number' => 'trim|max_length[20]',
-		'last_name' => 'trim|required|max_length[50]',
 		'country_code' => 'trim',
-		'birth_date' => 'valid_date|permit_empty',
-		'notes' => 'trim|max_length[16313]',
-		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
-		'middle_name' => 'trim|max_length[40]',
+		'city_name' => 'trim|required|max_length[60]',
 		];
 
     public function index() {
 
          $this->viewData['usingDataTables'] = true;
          
-		 $this->viewData['personList'] = $this->primaryModel->findAllWithAllRelations('*');
+		 $this->viewData['cityList'] = $this->primaryModel->findAllWithCountries('*');
 
          parent::index();
 
@@ -42,7 +33,7 @@ class People extends GoBaseController {
 
     public function add() {
 
-        $personModel = new PersonModel();
+        $cityModel = new CityModel();
 
         $requestMethod = $this->request->getMethod();
 
@@ -56,21 +47,22 @@ class People extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
 
-            $person = new Person($sanitizedData);
+            $city = new City($sanitizedData);
+			$this->formValidationRules['city_name'] .= '|is_unique[tbl_cities.city_name]';
 
             $formValid = $this->canValidate();
             $successfulResult = true;
             
             if ($formValid) :
                 try {
-                    $personModel->save($person);
+                    $cityModel->save($city);
                 } catch (\Exception $e) {
                     $successfulResult = false;
                     $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database :';
                     $result['error'] = $userFriendlyErrMsg;
-                    $query = $personModel->db->getLastQuery();
+                    $query = $cityModel->db->getLastQuery();
                     log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
-                    $dbError = $personModel->db->error();
+                    $dbError = $cityModel->db->error();
                     if (!empty($dbError['message'])) :
                         log_message('error', $dbError['code'].' : '.$dbError['message']);
                         $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
@@ -79,7 +71,7 @@ class People extends GoBaseController {
 
             else:
                 $successfulResult = false;
-                $this->viewData['errorMessage'] .= "You must first correct the errors in the form.<br> ";
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected";
             endif;
 
             $thenRedirect = true;
@@ -87,9 +79,10 @@ class People extends GoBaseController {
             if ($successfulResult) :
 
                 $insertedId = $this->primaryModel->db->insertID();
+                $theId = $insertedId;
 
-                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved <i>with ' . $this->primaryModel->getPrimaryKeyName() . ' : ' . $insertedId . '</i>. ';
-                $message .= '<a href="/' . $this->viewData['currentModule'] . '/edit/' . $insertedId . '">Continue editing?</a>';
+                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved' . (empty($this->primaryModel::$labelField) ? 'with name <i>' . $city->{$this->primaryModel::$labelField} . '</i>' : '').'. ';
+                $message .= '<a href="' . route_to('editCity', $theId) . '">Continue editing?</a>';
 
                 if ($thenRedirect) :
                     return $this->redirect2listView('successMessage', $message);
@@ -109,9 +102,11 @@ class People extends GoBaseController {
         
         endif; // ($requestMethod === 'post')
         
-        $this->viewData['person'] = $person ?? new Person();
+        $this->viewData['city'] = $city ?? new City();
 		$this->viewData['countryList'] = $this->getCountryListItems();
-		$this->viewData['cityList'] = $this->getCityListItems();
+
+
+        $this->viewData['formAction'] = route_to('createCity');
 
         $this->displayForm(__METHOD__);
     }
@@ -122,10 +117,10 @@ class People extends GoBaseController {
             return $this->redirect2listView();
         endif;
         $id = filter_var($requestedId, FILTER_SANITIZE_URL);
-        $person = $this->primaryModel->find($id);
+        $city = $this->primaryModel->find($id);
 
-        if ($person == false) :
-            $message = 'No such person ( with ' . $id . ') was found in the database.';
+        if ($city == false) :
+            $message = 'No such city ( with identifier ' . $id . ') was found in the database.';
             return $this->redirect2listView("errorMessage", $message);
         endif;
 
@@ -139,6 +134,11 @@ class People extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
         
+            if ($this->request->getPost('enabled') == null ) {
+                $sanitizedData['enabled'] = false;
+            }
+
+        
             $formValid = $this->canValidate();
             $successfulResult = false; // for now
 
@@ -148,18 +148,18 @@ class People extends GoBaseController {
                 } catch (\Exception $e) {
                     $query = $this->primaryModel->db->getLastQuery();
                     $dbError = $this->primaryModel->db->error();
-                    log_message('error', 'An error occurred in an attempt to update the '.static::singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
+                    log_message('error', 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
                 }
-                $person = $person->mergeAttributes($sanitizedData);
+                $city = $city->mergeAttributes($sanitizedData);
             endif;
 
             $thenRedirect = true;
 
             if ($successfulResult) :
-                $theId = $person->id;
-                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $person->{$this->primaryModel::$labelField} . '</b>' : '');
+                $theId = $city->id;
+                $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $city->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
-                $message .= '<a href="/' . $this->viewData['currentModule'] . '/edit/' . $theId . '">Continue editing?</a>';
+                $message .= '<a href="' . route_to('editCity', $theId) . '">Continue editing?</a>';
 
                 if ($thenRedirect) :
                     return $this->redirect2listView('successMessage', $message);
@@ -178,27 +178,21 @@ class People extends GoBaseController {
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
-        $this->viewData['person'] = $person;
-        		$this->viewData['countryList'] = $this->getCountryListItems();
-		$this->viewData['cityList'] = $this->getCityListItems();
+        $this->viewData['city'] = $city;
+		$this->viewData['countryList'] = $this->getCountryListItems();
 
+        
+        $theId = $id;
+		$this->viewData['formAction'] = route_to('updateCity', $theId);
+
+        
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 
 	protected function getCountryListItems() { 
 		$countryModel = new CountryModel();
 		$onlyActiveOnes = true;
-		$data = $countryModel->getAllForCiMenu('iso_code, country_name','country_name', $onlyActiveOnes);
-
-		return $data;
-	}
-
-
-
-	protected function getCityListItems() { 
-		$cityModel = new CityModel();
-		$onlyActiveOnes = true;
-		$data = $cityModel->getAllForCiMenu('id, city_name','city_name', $onlyActiveOnes);
+		$data = $countryModel->getAllForMenu('iso_code, country_name','country_name', $onlyActiveOnes);
 
 		return $data;
 	}

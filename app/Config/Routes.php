@@ -33,30 +33,30 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 
 // Additional in-file definitions
-$routes->get('countries', 'Countries::index');
-$routes->get('countries/index', 'Countries::index');
-$routes->get('countries/list', 'Countries::index');
-$routes->get('countries/add', 'Countries::add');
-$routes->post('countries/add', 'Countries::add');
-$routes->get('countries/edit/(:alphanum)', 'Countries::edit/$1');
-$routes->post('countries/edit/(:alphanum)', 'Countries::edit/$1');
-$routes->get('countries/delete/(:alphanum)', 'Countries::delete/$1');
-$routes->get('cities', 'Cities::index');
-$routes->get('cities/index', 'Cities::index');
-$routes->get('cities/list', 'Cities::index');
-$routes->get('cities/add', 'Cities::add');
-$routes->post('cities/add', 'Cities::add');
-$routes->get('cities/edit/(:num)', 'Cities::edit/$1');
-$routes->post('cities/edit/(:num)', 'Cities::edit/$1');
-$routes->get('cities/delete/(:num)', 'Cities::delete/$1');
-$routes->get('people', 'People::index');
-$routes->get('people/index', 'People::index');
-$routes->get('people/list', 'People::index');
-$routes->get('people/add', 'People::add');
-$routes->post('people/add', 'People::add');
-$routes->get('people/edit/(:num)', 'People::edit/$1');
-$routes->post('people/edit/(:num)', 'People::edit/$1');
-$routes->get('people/delete/(:num)', 'People::delete/$1');
+$routes->get('countries', 'CountriesController::index', ['as' => 'countries']);
+$routes->get('countries/index', 'CountriesController::index', ['as' => 'countryIndex']);
+$routes->get('countries/list', 'CountriesController::index', ['as' => 'countryList']);
+$routes->get('countries/add', 'CountriesController::add', ['as' => 'newCountry']);
+$routes->post('countries/add', 'CountriesController::add', ['as' => 'createCountry']);
+$routes->get('countries/edit/(:alphanum)', 'CountriesController::edit/$1', ['as' => 'editCountry']);
+$routes->post('countries/edit/(:alphanum)', 'CountriesController::edit/$1', ['as' => 'updateCountry']);
+$routes->get('countries/delete/(:alphanum)', 'CountriesController::delete/$1', ['as' => 'deleteCountry']);
+$routes->get('cities', 'CitiesController::index', ['as' => 'cities']);
+$routes->get('cities/index', 'CitiesController::index', ['as' => 'cityIndex']);
+$routes->get('cities/list', 'CitiesController::index', ['as' => 'cityList']);
+$routes->get('cities/add', 'CitiesController::add', ['as' => 'newCity']);
+$routes->post('cities/add', 'CitiesController::add', ['as' => 'createCity']);
+$routes->get('cities/edit/(:num)', 'CitiesController::edit/$1', ['as' => 'editCity']);
+$routes->post('cities/edit/(:num)', 'CitiesController::edit/$1', ['as' => 'updateCity']);
+$routes->get('cities/delete/(:num)', 'CitiesController::delete/$1', ['as' => 'deleteCity']);
+$routes->get('people', 'PeopleController::index', ['as' => 'people']);
+$routes->get('people/index', 'PeopleController::index', ['as' => 'personIndex']);
+$routes->get('people/list', 'PeopleController::index', ['as' => 'personList']);
+$routes->get('people/add', 'PeopleController::add', ['as' => 'newPerson']);
+$routes->post('people/add', 'PeopleController::add', ['as' => 'createPerson']);
+$routes->get('people/edit/(:num)', 'PeopleController::edit/$1', ['as' => 'editPerson']);
+$routes->post('people/edit/(:num)', 'PeopleController::edit/$1', ['as' => 'updatePerson']);
+$routes->get('people/delete/(:num)', 'PeopleController::delete/$1', ['as' => 'deletePerson']);
 
 /**
  * --------------------------------------------------------------------

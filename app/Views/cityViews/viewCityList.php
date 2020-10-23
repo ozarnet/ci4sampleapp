@@ -37,8 +37,8 @@
 						<?php foreach ($cityList as $item ) : ?>
 							<tr>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\Cities::edit/$1', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\Cities::delete/$1', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editCity', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCity', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 								<td class="align-middle text-center">
 									<?=$item->id ?>
@@ -59,8 +59,8 @@
 
 								</td>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\Cities::edit/$1', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\Cities::delete/$1', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editCity', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCity', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 							</tr>
 
@@ -69,7 +69,7 @@
 					</table>
 			</div><!--//.card-body -->
 			<div class="card-footer">
-				<a href="<?=route_to('App\Controllers\Cities::add') ?>" class="btn btn-primary">
+				<a href="<?=route_to('newCity') ?>" class="btn btn-primary">
 				Add a New City
 		</a>
 			</div><!--//.card-footer -->

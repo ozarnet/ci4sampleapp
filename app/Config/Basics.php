@@ -26,7 +26,7 @@ use CodeIgniter\Config\BaseConfig;
 
 class Basics extends BaseConfig {
 
-	public $appName = 'CCP3';
+	public $appName = 'Country City Person DB';
 
 	public $i18n = 'English'; 
 
@@ -67,7 +67,7 @@ class Basics extends BaseConfig {
 		'bg'   => 'gray-dark',
 		'logo' => [
 		'icon'   => 'favicon.ico', // path to image | this example icon on public root folder.
-		'text'   => 'CCP3',
+		'text'   => 'CountryCityPersonDB',
 		'shadow' => 2,
 		],
 	],
@@ -79,7 +79,7 @@ class Basics extends BaseConfig {
 		'footer' => [
 		'fixed'      => false,
 		'organization' => 'Ozar.net',
-		'orglink' => 'https://www.ozar.net/',
+		'orglink' => 'https://www.ozar.net/?ref=gh',
 		],
 	];
 

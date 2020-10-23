@@ -4,18 +4,17 @@ function goSanitize($var, bool $nullIfEmpty = true, bool $allowTags = false, boo
     
     $malScore = 0;
     
-    if (empty($var)) {
-        return [$nullIfEmpty ? null : $var, 0];
-    }
-    
     if (is_numeric($var) ) {
-        if (is_int($var)) {
-            $finalVal = filter_var($var, FILTER_SANITIZE_NUMBER_INT);
+        if (strpos($var, '.')===false) {
+            $finalVal = intval(filter_var($var, FILTER_SANITIZE_NUMBER_INT));
         } else {
             $finalVal = filter_var($var, FILTER_SANITIZE_NUMBER_FLOAT);
         }
-    } else {
 
+    } else {
+        if (empty($var)) {
+            return [$nullIfEmpty ? null : $var, 0];
+        }
         $str1 = $allowTags ? $var : strip_tags($var);
         
         if (!$allowJs) {
@@ -54,7 +53,7 @@ function goSanitize($var, bool $nullIfEmpty = true, bool $allowTags = false, boo
 
 
 function convertTurkishCharacters($text) {
-    // https://www.kodevreni.com/639-php-türkçe-karakterleri-ingilizceye-dönüştürme/
+    
     $text = trim($text);
     $search = array('Ç','ç','Ğ','ğ','ı','İ','Ö','ö','Ş','ş','Ü','ü',' ');
     $replace = array('c','c','g','g','i','i','o','o','s','s','u','u','-');

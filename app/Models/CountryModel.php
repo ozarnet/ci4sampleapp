@@ -5,7 +5,7 @@ class CountryModel extends GoBaseModel
 {
     protected $table = 'tbl_countries';
  
-		protected $primaryKey = 'iso_code';
+	protected $primaryKey = 'iso_code';
 
 
 	protected $allowedFields = [

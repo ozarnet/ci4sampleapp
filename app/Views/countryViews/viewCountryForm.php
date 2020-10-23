@@ -6,18 +6,18 @@
 		<div class="card card-info">
 			<div class="card-header">
 				<h3 class="card-title"><?=$pageTitle ?></h3>
-			</div><!--//.card-header -->
-			<?=form_open($formAction, ['id'=>'countryForm'])  ?>
+			</div><!-- /.card-header -->
+			<?=form_open($formAction, ['id'=>'countryForm', 'class'=>'form-horizontal'])  ?>
 			<div class="card-body">
 				<?=view('Themes/_commonPartials/_alertBoxes') ?>
 				<?=view('countryViews/_countryFormItems') ?>
 			</div><!-- /.card-body -->
 			<div class="card-footer">
-				<?=form_submit('save', ' Save ', ['class'=>'btn btn-primary']) ?>
-				<a href="<?=route_to('App\Controllers\Countries::index') ?>" class="btn btn-default float-right">Cancel</a>
+				<input type="submit" class="btn btn-primary" name="save" value=" Save ">
+				<a href="<?=route_to('countries') ?>" class="btn btn-default float-right">Cancel</a>
 			</div><!-- /.card-footer -->
 			<?=form_close() ?>
-    </div><!-- //.card -->
-	</div><!--//.col -->
-</div><!--//.row -->
+		</div><!-- //.card -->
+	</div><!--/.col -->
+</div><!-- /.row -->
 <?=$this->endSection() ?>

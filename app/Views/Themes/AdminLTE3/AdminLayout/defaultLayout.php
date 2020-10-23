@@ -94,7 +94,7 @@
         <!-- To the right -->
         <div class="float-right d-none d-sm-inline">
             <?= config('Basics')->appName ?>  created with 
-            <a href="https://www.ozar.net/products/codeigniterwizard/"><strong>CodeIgniter Wizard</strong> Mac App</a>
+            <a href="https://www.ozar.net/products/codeigniterwizard/?ref=gh"><strong>CodeIgniter Wizard</strong> Mac App</a>
         </div>
     </footer>
 </div>

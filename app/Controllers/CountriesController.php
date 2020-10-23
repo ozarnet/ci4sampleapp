@@ -1,21 +1,22 @@
 <?php  namespace App\Controllers;
 
+
 use App\Models\CountryModel;
 use App\Entities\Country;
 
-class Countries extends GoBaseController { 
+class CountriesController extends GoBaseController { 
 
     protected static $primaryModelName = 'CountryModel';
     protected static $singularObjectName = 'Country';
     protected static $singularObjectNameCc = 'country';
     protected static $pluralObjectName = 'Countries';
-    protected static $pluralObjectNameCc = 'Countries';
+    protected static $pluralObjectNameCc = 'countries';
 
     protected static $viewPath = 'countryViews/';
 
     protected $formValidationRules = [
-		'country_name' => 'trim|required|max_length[60]',
 		'iso_code' => 'trim|required|exact_length[2]',
+		'country_name' => 'trim|required|max_length[60]',
 		];
 
     public function index() {
@@ -66,7 +67,7 @@ class Countries extends GoBaseController {
 
             else:
                 $successfulResult = false;
-                $this->viewData['errorMessage'] .= "You must first correct the errors in the form.<br> ";
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected";
             endif;
 
             $thenRedirect = true;
@@ -74,9 +75,10 @@ class Countries extends GoBaseController {
             if ($successfulResult) :
 
                 $insertedId = $country->{$this->primaryModel->getPrimaryKeyName()};
+                $theId = $insertedId;
 
-                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved <i>with ' . $this->primaryModel->getPrimaryKeyName() . ' : ' . $insertedId . '</i>. ';
-                $message .= '<a href="/' . $this->viewData['currentModule'] . '/edit/' . $insertedId . '">Continue editing?</a>';
+                $message = 'The ' . strtolower(static::$singularObjectName) . ' was successfully saved <i>with ' . $this->primaryModel->getPrimaryKeyName() . ' : ' . $theId . '</i>. ';
+                $message .= '<a href="' . route_to('editCountry', $theId) . '">Continue editing?</a>';
 
                 if ($thenRedirect) :
                     return $this->redirect2listView('successMessage', $message);
@@ -98,6 +100,9 @@ class Countries extends GoBaseController {
         
         $this->viewData['country'] = $country ?? new Country();
 
+
+        $this->viewData['formAction'] = route_to('createCountry');
+
         $this->displayForm(__METHOD__);
     }
 
@@ -110,7 +115,7 @@ class Countries extends GoBaseController {
         $country = $this->primaryModel->find($id);
 
         if ($country == false) :
-            $message = 'No such country ( with ' . $id . ') was found in the database.';
+            $message = 'No such country ( with identifier ' . $id . ') was found in the database.';
             return $this->redirect2listView("errorMessage", $message);
         endif;
 
@@ -124,6 +129,11 @@ class Countries extends GoBaseController {
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
         
+            if ($this->request->getPost('enabled') == null ) {
+                $sanitizedData['enabled'] = false;
+            }
+
+        
             $formValid = $this->canValidate();
             $successfulResult = false; // for now
 
@@ -133,7 +143,7 @@ class Countries extends GoBaseController {
                 } catch (\Exception $e) {
                     $query = $this->primaryModel->db->getLastQuery();
                     $dbError = $this->primaryModel->db->error();
-                    log_message('error', 'An error occurred in an attempt to update the '.static::singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
+                    log_message('error', 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
                 }
                 $country = $country->mergeAttributes($sanitizedData);
             endif;
@@ -144,7 +154,7 @@ class Countries extends GoBaseController {
                 $theId = $country->iso_code;
                 $message = 'The ' . strtolower(static::$singularObjectName) . (!empty($this->primaryModel::$labelField) ? ' named <b>' . $country->{$this->primaryModel::$labelField} . '</b>' : '');
                 $message .= ' was successfully updated. ';
-                $message .= '<a href="/' . $this->viewData['currentModule'] . '/edit/' . $theId . '">Continue editing?</a>';
+                $message .= '<a href="' . route_to('editCountry', $theId) . '">Continue editing?</a>';
 
                 if ($thenRedirect) :
                     return $this->redirect2listView('successMessage', $message);
@@ -164,6 +174,11 @@ class Countries extends GoBaseController {
         endif; // ($requestMethod === 'post')
 
         $this->viewData['country'] = $country;
+
+        
+        $theId = $id;
+		$this->viewData['formAction'] = route_to('updateCountry', $theId);
+
         
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)

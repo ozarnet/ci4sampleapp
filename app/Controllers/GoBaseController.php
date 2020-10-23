@@ -3,12 +3,13 @@
 namespace App\Controllers;
 
 /**
- * Class BaseController
+ * Class GoBaseController
  *
- * BaseController provides a convenient place for loading components
+ * GoBaseController is an extension of BaseController class that 
+ * provides a convenient place for loading components
  * and performing functions that are needed by all your controllers.
  * Extend this class in any new controllers:
- *     class Home extends BaseController
+ *     class Home extends GoBaseController
  *
  * For security be sure to declare any new methods as protected or private.
  *
@@ -17,7 +18,6 @@ namespace App\Controllers;
 use CodeIgniter\Controller;
 use CodeIgniter\Database\Query;
 
-// use App\Controllers\CodeIgniter\Database\Query;
 
 abstract class GoBaseController extends Controller {
 
@@ -142,9 +142,9 @@ abstract class GoBaseController extends Controller {
         if (empty(static::$pluralObjectName)) {
             $reflect = new \ReflectionClass($this);
             $className = $reflect->getShortName();
-            $this->viewData['currentModule'] = $className;
+            $this->viewData['currentModule'] = str_replace('Controller','',$className);
         } else {
-            $this->viewData['currentModule'] = ucfirst(strtolower(static::$pluralObjectName));
+            $this->viewData['currentModule'] = ucfirst(strtolower(static::$pluralObjectNameCc));
         }
 
         $this->viewData['viewPath'] = static::$viewPath;
@@ -203,19 +203,24 @@ abstract class GoBaseController extends Controller {
         $formActionSuffix = '';
 
         if ($action === 'add') {
-            $actionSuffix = ' a New ';
+            $actionSuffix = empty(static::$singularObjectName) || stripos(static::$singularObjectName, 'new') === false ? ' a New ' : ' ';
         } elseif ($action === 'edit' && $objId != null) {
             $formActionSuffix = $objId . '/';
         }
 
-        $this->viewData['action'] = $action;
-        $this->viewData['formAction'] = base_url(strtolower($this->viewData['currentModule'])  . '/' . $action . '/' . $formActionSuffix);
+        if (!isset($this->viewData['action'])) {
+            $this->viewData['action'] = $action;
+        }
+
+        if (!isset($this->viewData['formAction'])) {
+            $this->viewData['formAction'] = base_url(strtolower($this->viewData['currentModule'])  . '/' . $action . '/' . $formActionSuffix);
+        }
 
         $this->viewData['pageTitle'] = ucfirst($action) . $actionSuffix . ucfirst(static::$singularObjectName);
         
         $this->viewData['validation'] = $validation;
 
-        $viewFilePath = static::$viewPath . 'view' . static::$singularObjectNameCc . 'Form';
+        $viewFilePath = static::$viewPath . 'view' . ucfirst(static::$singularObjectNameCc) . 'Form';
 
         echo view($viewFilePath, $this->viewData);
     }
@@ -236,7 +241,7 @@ abstract class GoBaseController extends Controller {
         endif;
 
         if (empty($id) || $id === 0) :
-            $error = 'Invalid identifier provided to delete object.';
+            $error = 'Invalid identifier provided to delete the object.';
         endif;
 
         $rawResult = null;

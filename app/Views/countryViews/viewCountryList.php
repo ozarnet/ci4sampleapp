@@ -36,8 +36,8 @@
 						<?php foreach ($countryList as $item ) : ?>
 							<tr>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\Countries::edit/$1', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\Countries::delete/$1', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editCountry', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCountry', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 								<td class="align-middle text-center">
 									<?=$item->iso_code ?>
@@ -55,8 +55,8 @@
 
 								</td>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\Countries::edit/$1', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\Countries::delete/$1', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editCountry', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCountry', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 							</tr>
 
@@ -65,7 +65,7 @@
 					</table>
 			</div><!--//.card-body -->
 			<div class="card-footer">
-				<a href="<?=route_to('App\Controllers\Countries::add') ?>" class="btn btn-primary">
+				<a href="<?=route_to('newCountry') ?>" class="btn btn-primary">
 				Add a New Country
 		</a>
 			</div><!--//.card-footer -->

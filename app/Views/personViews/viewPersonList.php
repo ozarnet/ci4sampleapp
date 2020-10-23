@@ -28,18 +28,19 @@
 								<th class="text-nowrap">Action</th>
 								<th>ID</th>
 								<th>First Name</th>
+								<th>Middle Name</th>
 								<th>Last Name</th>
 								<th>Phone Number</th>
 								<th>Email Address</th>
-								<th>Country</th>
 								<th>City</th>
-								<th>Birth Date</th>
-								<th>Is Friend</th>
-								<th>Created on</th>
-								<th>Last Modification</th>
-								<th>Notes</th>
-								<th>Active</th>
+								<th>Contact Type</th>
 								<th>Score</th>
+								<th>Is Friend?</th>
+								<th>Active?</th>
+								<th>Created At</th>
+								<th>Updated At</th>
+								<th>Birth Date</th>
+								<th>Notes</th>
 								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>
@@ -47,14 +48,17 @@
 						<?php foreach ($personList as $item ) : ?>
 							<tr>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\People::edit/$1', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\People::delete/$1', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editPerson', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deletePerson', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 								<td class="align-middle text-center">
 									<?=$item->id ?>
 								</td>
 								<td class="align-middle">
 									<?=$item->first_name ?>
+								</td>
+								<td class="align-middle">
+									<?=$item->middle_name ?>
 								</td>
 								<td class="align-middle">
 									<?=$item->last_name ?>
@@ -66,13 +70,13 @@
 									<?=$item->email_address ?>
 								</td>
 								<td class="align-middle">
-									<?=$item->country_name ?>
-								</td>
-								<td class="align-middle">
 									<?=$item->city_name ?>
 								</td>
 								<td class="align-middle">
-									<?= empty($item->birth_date) ? '' : date('d/m/Y', strtotime($item->birth_date))  ?>
+									<?=$item->person_type ?>
+								</td>
+								<td class="align-middle">
+									<?=$item->score ?>
 								</td>
 								<td class="align-middle text-center text-green">
 
@@ -83,15 +87,6 @@
 								<?php  }  ?>
 
 								</td>
-								<td class="align-middle">
-									<?= empty($item->created_at) ? '' : date('d/m/Y H:i', strtotime($item->created_at))  ?>
-								</td>
-								<td class="align-middle">
-									<?= empty($item->updated_at) ? '' : date('d/m/Y H:i', strtotime($item->updated_at))  ?>
-								</td>
-								<td class="align-middle">
-									<?=$item->notes ?>
-								</td>
 								<td class="align-middle text-center text-green">
 
 								<?php if ( $item->enabled ) { ?>
@@ -101,12 +96,21 @@
 								<?php  }  ?>
 
 								</td>
+								<td class="align-middle text-nowrap">
+									<?= empty($item->created_at) ? '' : date('d/m/Y H:i', strtotime($item->created_at))  ?>
+								</td>
+								<td class="align-middle text-nowrap">
+									<?= empty($item->updated_at) ? '' : date('d/m/Y H:i', strtotime($item->updated_at))  ?>
+								</td>
+								<td class="align-middle text-nowrap">
+									<?= empty($item->birth_date) ? '' : date('d/m/Y', strtotime($item->birth_date))  ?>
+								</td>
 								<td class="align-middle">
-									<?=$item->score ?>
+									<?=$item->notes ?>
 								</td>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('App\Controllers\People::edit/$1', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>">Edit</a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('App\Controllers\People::delete/$1', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete">Delete</a>
+									<a href="<?=route_to('editPerson', $item->id) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->id ?>"><i class="fas fa-edit"></i></a>
+									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deletePerson', $item->id) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
 								</td>
 							</tr>
 
@@ -115,7 +119,7 @@
 					</table>
 			</div><!--//.card-body -->
 			<div class="card-footer">
-				<a href="<?=route_to('App\Controllers\People::add') ?>" class="btn btn-primary">
+				<a href="<?=route_to('newPerson') ?>" class="btn btn-primary">
 				Add a New Person
 		</a>
 			</div><!--//.card-footer -->
