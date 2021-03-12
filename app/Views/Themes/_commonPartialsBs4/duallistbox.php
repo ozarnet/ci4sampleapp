@@ -8,5 +8,5 @@
 
 <!-- Push section js -->
 <?= $this->section('js') ?>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap4-duallistbox/4.0.1/jquery.bootstrap-duallistbox.min.js" defer></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap4-duallistbox/4.0.1/jquery.bootstrap-duallistbox.min.js"></script>
 <?= $this->endSection() ?>

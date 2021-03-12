@@ -1,12 +1,40 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Commands\Database;
@@ -17,9 +45,12 @@ use Config\Services;
 
 /**
  * Displays a list of all migrations and whether they've been run or not.
+ *
+ * @package CodeIgniter\Commands
  */
 class MigrateStatus extends BaseCommand
 {
+
 	/**
 	 * The group the command is lumped under
 	 * when listing commands.
@@ -47,12 +78,19 @@ class MigrateStatus extends BaseCommand
 	 *
 	 * @var string
 	 */
-	protected $usage = 'migrate:status [options]';
+	protected $usage = 'migrate:status [Options]';
+
+	/**
+	 * the Command's Arguments
+	 *
+	 * @var array
+	 */
+	protected $arguments = [];
 
 	/**
 	 * the Command's Options
 	 *
-	 * @var array<string, string>
+	 * @var array
 	 */
 	protected $options = [
 		'-g' => 'Set database group',
@@ -61,11 +99,12 @@ class MigrateStatus extends BaseCommand
 	/**
 	 * Namespaces to ignore when looking for migrations.
 	 *
-	 * @var string[]
+	 * @var type
 	 */
 	protected $ignoredNamespaces = [
 		'CodeIgniter',
 		'Config',
+		'Tests\Support',
 		'Kint',
 		'Laminas\ZendFrameworkBridge',
 		'Laminas\Escaper',
@@ -75,101 +114,79 @@ class MigrateStatus extends BaseCommand
 	/**
 	 * Displays a list of all migrations and whether they've been run or not.
 	 *
-	 * @param array<string, mixed> $params
-	 *
-	 * @return void
+	 * @param array $params
 	 */
-	public function run(array $params)
+	public function run(array $params = [])
 	{
 		$runner = Services::migrations();
-		$group  = $params['g'] ?? CLI::getOption('g');
+
+		$group = $params['-g'] ?? CLI::getOption('g');
+
+		if (! is_null($group))
+		{
+			$runner->setGroup($group);
+		}
 
 		// Get all namespaces
 		$namespaces = Services::autoloader()->getNamespace();
 
-		// Collection of migration status
-		$status = [];
+		// Determines whether any migrations were found
+		$found = false;
 
+		// Loop for all $namespaces
 		foreach ($namespaces as $namespace => $path)
 		{
-			if (ENVIRONMENT !== 'testing')
-			{
-				// Make Tests\\Support discoverable for testing
-				$this->ignoredNamespaces[] = 'Tests\Support'; // @codeCoverageIgnore
-			}
-
-			if (in_array($namespace, $this->ignoredNamespaces, true))
+			if (in_array($namespace, $this->ignoredNamespaces))
 			{
 				continue;
 			}
 
-			if (APP_NAMESPACE !== 'App' && $namespace === 'App')
-			{
-				continue; // @codeCoverageIgnore
-			}
-
-			$migrations = $runner->findNamespaceMigrations($namespace);
+			$runner->setNamespace($namespace);
+			$migrations = $runner->findMigrations();
 
 			if (empty($migrations))
 			{
 				continue;
 			}
 
-			$history = $runner->getHistory((string) $group);
+			$found   = true;
+			$history = $runner->getHistory();
+
+			CLI::write($namespace);
+
 			ksort($migrations);
+
+			$max = 0;
+			foreach ($migrations as $version => $migration)
+			{
+				$file                       = substr($migration->name, strpos($migration->name, $version . '_'));
+				$migrations[$version]->name = $file;
+
+				$max = max($max, strlen($file));
+			}
+
+			CLI::write('  ' . str_pad(lang('Migrations.filename'), $max + 4) . lang('Migrations.on'), 'yellow');
 
 			foreach ($migrations as $uid => $migration)
 			{
-				$migrations[$uid]->name = mb_substr($migration->name, mb_strpos($migration->name, $uid . '_'));
-
-				$date  = '---';
-				$group = '---';
-				$batch = '---';
-
+				$date = '';
 				foreach ($history as $row)
 				{
-					// @codeCoverageIgnoreStart
-					if ($runner->getObjectUid($row) !== $migration->uid)
+					if ($runner->getObjectUid($row) !== $uid)
 					{
 						continue;
 					}
 
-					$date  = date('Y-m-d H:i:s', $row->time);
-					$group = $row->group;
-					$batch = $row->batch;
-					// @codeCoverageIgnoreEnd
+					$date = date('Y-m-d H:i:s', $row->time);
 				}
-
-				$status[] = [
-					$namespace,
-					$migration->version,
-					$migration->name,
-					$group,
-					$date,
-					$batch,
-				];
+				CLI::write(str_pad('  ' . $migration->name, $max + 6) . ($date ? $date : '---'));
 			}
 		}
 
-		if (! $status)
+		if (! $found)
 		{
-			// @codeCoverageIgnoreStart
-			CLI::error(lang('Migrations.noneFound'), 'light_gray', 'red');
-			CLI::newLine();
-
-			return;
-			// @codeCoverageIgnoreEnd
+			CLI::error(lang('Migrations.noneFound'));
 		}
-
-		$headers = [
-			CLI::color(lang('Migrations.namespace'), 'yellow'),
-			CLI::color(lang('Migrations.version'), 'yellow'),
-			CLI::color(lang('Migrations.filename'), 'yellow'),
-			CLI::color(lang('Migrations.group'), 'yellow'),
-			CLI::color(str_replace(': ', '', lang('Migrations.on')), 'yellow'),
-			CLI::color(lang('Migrations.batch'), 'yellow'),
-		];
-
-		CLI::table($status, $headers);
 	}
+
 }

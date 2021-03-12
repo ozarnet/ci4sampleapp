@@ -1,25 +1,53 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Database\Postgre;
 
-use BadMethodCallException;
 use CodeIgniter\Database\BasePreparedQuery;
-use Exception;
+use CodeIgniter\Database\PreparedQueryInterface;
 
 /**
  * Prepared query for Postgre
  */
-class PreparedQuery extends BasePreparedQuery
+class PreparedQuery extends BasePreparedQuery implements PreparedQueryInterface
 {
+
 	/**
 	 * Stores the name this query can be
 	 * used under by postgres. Only used internally.
@@ -32,9 +60,11 @@ class PreparedQuery extends BasePreparedQuery
 	 * The result resource from a successful
 	 * pg_exec. Or false.
 	 *
-	 * @var Result|boolean
+	 * @var
 	 */
 	protected $result;
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Prepares the query against the database, and saves the connection
@@ -48,11 +78,11 @@ class PreparedQuery extends BasePreparedQuery
 	 *                        Unused in the MySQLi driver.
 	 *
 	 * @return mixed
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function _prepare(string $sql, array $options = [])
 	{
-		$this->name = (string) random_int(1, 10000000000000000);
+		$this->name = random_int(1, 10000000000000000);
 
 		$sql = $this->parameterize($sql);
 
@@ -69,6 +99,8 @@ class PreparedQuery extends BasePreparedQuery
 		return $this;
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Takes a new set of data and runs it against the currently
 	 * prepared query. Upon success, will return a Results object.
@@ -79,15 +111,17 @@ class PreparedQuery extends BasePreparedQuery
 	 */
 	public function _execute(array $data): bool
 	{
-		if (! isset($this->statement))
+		if (is_null($this->statement))
 		{
-			throw new BadMethodCallException('You must call prepare before trying to execute a prepared statement.');
+			throw new \BadMethodCallException('You must call prepare before trying to execute a prepared statement.');
 		}
 
 		$this->result = pg_execute($this->db->connID, $this->name, $data);
 
 		return (bool) $this->result;
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Returns the result object for the prepared query.
@@ -98,6 +132,8 @@ class PreparedQuery extends BasePreparedQuery
 	{
 		return $this->result;
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Replaces the ? placeholders with $1, $2, etc parameters for use
@@ -117,4 +153,6 @@ class PreparedQuery extends BasePreparedQuery
 			return "\${$count}";
 		}, $sql);
 	}
+
+	//--------------------------------------------------------------------
 }

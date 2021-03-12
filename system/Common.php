@@ -1,26 +1,49 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT  MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
-use CodeIgniter\Cache\CacheInterface;
-use CodeIgniter\Config\Factories;
-use CodeIgniter\Database\BaseConnection;
+use CodeIgniter\Config\Config;
 use CodeIgniter\Database\ConnectionInterface;
-use CodeIgniter\Debug\Timer;
 use CodeIgniter\Files\Exceptions\FileNotFoundException;
-use CodeIgniter\HTTP\Exceptions\HTTPException;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use CodeIgniter\HTTP\URI;
-use CodeIgniter\Session\Session;
 use CodeIgniter\Test\TestLogger;
 use Config\App;
 use Config\Database;
@@ -29,6 +52,14 @@ use Config\Services;
 use Config\View;
 use Laminas\Escaper\Escaper;
 
+/**
+ * Common Functions
+ *
+ * Several application-wide utility methods.
+ *
+ * @package  CodeIgniter
+ * @category Common Functions
+ */
 //--------------------------------------------------------------------
 // Services Convenience Functions
 //--------------------------------------------------------------------
@@ -64,7 +95,7 @@ if (! function_exists('cache'))
 	 *
 	 * @param string|null $key
 	 *
-	 * @return CacheInterface|mixed
+	 * @return \CodeIgniter\Cache\CacheInterface|mixed
 	 */
 	function cache(string $key = null)
 	{
@@ -78,40 +109,6 @@ if (! function_exists('cache'))
 
 		// Still here? Retrieve the value.
 		return $cache->get($key);
-	}
-}
-
-if (! function_exists('clean_path'))
-{
-	/**
-	 * A convenience method to clean paths for
-	 * a nicer looking output. Useful for exception
-	 * handling, error logging, etc.
-	 *
-	 * @param string $path
-	 *
-	 * @return string
-	 */
-	function clean_path(string $path): string
-	{
-		// Resolve relative paths
-		$path = realpath($path) ?: $path;
-
-		switch (true)
-		{
-			case strpos($path, APPPATH) === 0:
-				return 'APPPATH' . DIRECTORY_SEPARATOR . substr($path, strlen(APPPATH));
-			case strpos($path, SYSTEMPATH) === 0:
-				return 'SYSTEMPATH' . DIRECTORY_SEPARATOR . substr($path, strlen(SYSTEMPATH));
-			case strpos($path, FCPATH) === 0:
-				return 'FCPATH' . DIRECTORY_SEPARATOR . substr($path, strlen(FCPATH));
-			case defined('VENDORPATH') && strpos($path, VENDORPATH) === 0:
-				return 'VENDORPATH' . DIRECTORY_SEPARATOR . substr($path, strlen(VENDORPATH));
-			case strpos($path, ROOTPATH) === 0:
-				return 'ROOTPATH' . DIRECTORY_SEPARATOR . substr($path, strlen(ROOTPATH));
-			default:
-				return $path;
-		}
 	}
 }
 
@@ -130,90 +127,23 @@ if (! function_exists('command'))
 	 */
 	function command(string $command)
 	{
-		$runner      = service('commands');
-		$regexString = '([^\s]+?)(?:\s|(?<!\\\\)"|(?<!\\\\)\'|$)';
-		$regexQuoted = '(?:"([^"\\\\]*(?:\\\\.[^"\\\\]*)*)"|\'([^\'\\\\]*(?:\\\\.[^\'\\\\]*)*)\')';
+		$runner = service('commands');
 
-		$args   = [];
-		$length = strlen($command);
-		$cursor = 0;
-
-		/**
-		 * Adopted from Symfony's `StringInput::tokenize()` with few changes.
-		 *
-		 * @see https://github.com/symfony/symfony/blob/master/src/Symfony/Component/Console/Input/StringInput.php
-		 */
-		while ($cursor < $length)
-		{
-			if (preg_match('/\s+/A', $command, $match, 0, $cursor))
-			{
-				// nothing to do
-			}
-			elseif (preg_match('/' . $regexQuoted . '/A', $command, $match, 0, $cursor))
-			{
-				$args[] = stripcslashes(substr($match[0], 1, strlen($match[0]) - 2));
-			}
-			elseif (preg_match('/' . $regexString . '/A', $command, $match, 0, $cursor))
-			{
-				$args[] = stripcslashes($match[1]);
-			}
-			else
-			{
-				// @codeCoverageIgnoreStart
-				throw new InvalidArgumentException(sprintf('Unable to parse input near "... %s ...".', substr($command, $cursor, 10)));
-				// @codeCoverageIgnoreEnd
-			}
-
-			$cursor += strlen($match[0]);
-		}
-
-		$command     = array_shift($args);
-		$params      = [];
-		$optionValue = false;
-
-		foreach ($args as $i => $arg)
-		{
-			if (mb_strpos($arg, '-') !== 0)
-			{
-				if ($optionValue)
-				{
-					// if this was an option value, it was already
-					// included in the previous iteration
-					$optionValue = false;
-				}
-				else
-				{
-					// add to segments if not starting with '-'
-					// and not an option value
-					$params[] = $arg;
-				}
-
-				continue;
-			}
-
-			$arg   = ltrim($arg, '-');
-			$value = null;
-
-			if (isset($args[$i + 1]) && mb_strpos($args[$i + 1], '-') !== 0)
-			{
-				$value       = $args[$i + 1];
-				$optionValue = true;
-			}
-
-			$params[$arg] = $value;
-		}
+		$params  = explode(' ', $command);
+		$command = array_shift($params);
 
 		ob_start();
 		$runner->run($command, $params);
+		$output = ob_get_clean();
 
-		return ob_get_clean();
+		return $output;
 	}
 }
 
 if (! function_exists('config'))
 {
 	/**
-	 * More simple way of getting config instances from Factories
+	 * More simple way of getting config instances
 	 *
 	 * @param string  $name
 	 * @param boolean $getShared
@@ -222,7 +152,7 @@ if (! function_exists('config'))
 	 */
 	function config(string $name, bool $getShared = true)
 	{
-		return Factories::config($name, ['getShared' => $getShared]);
+		return Config::get($name, $getShared);
 	}
 }
 
@@ -237,7 +167,9 @@ if (! function_exists('csrf_token'))
 	 */
 	function csrf_token(): string
 	{
-		return Services::security()->getTokenName();
+		$config = config(App::class);
+
+		return $config->CSRFTokenName;
 	}
 }
 
@@ -252,7 +184,9 @@ if (! function_exists('csrf_header'))
 	 */
 	function csrf_header(): string
 	{
-		return Services::security()->getHeaderName();
+		$config = config(App::class);
+
+		return $config->CSRFHeaderName;
 	}
 }
 
@@ -267,7 +201,9 @@ if (! function_exists('csrf_hash'))
 	 */
 	function csrf_hash(): string
 	{
-		return Services::security()->getHash();
+		$security = Services::security(null, true);
+
+		return $security->getCSRFHash();
 	}
 }
 
@@ -317,10 +253,10 @@ if (! function_exists('db_connect'))
 	 * If $getShared === false then a new connection instance will be provided,
 	 * otherwise it will all calls will return the same instance.
 	 *
-	 * @param ConnectionInterface|array|string|null $db
-	 * @param boolean                               $getShared
+	 * @param \CodeIgniter\Database\ConnectionInterface|array|string $db
+	 * @param boolean                                                $getShared
 	 *
-	 * @return BaseConnection
+	 * @return \CodeIgniter\Database\BaseConnection
 	 */
 	function db_connect($db = null, bool $getShared = true)
 	{
@@ -355,14 +291,18 @@ if (! function_exists('env'))
 	 * retrieving values set from the .env file for
 	 * use in config files.
 	 *
-	 * @param string      $key
-	 * @param string|null $default
+	 * @param string $key
+	 * @param null   $default
 	 *
 	 * @return mixed
 	 */
 	function env(string $key, $default = null)
 	{
-		$value = $_ENV[$key] ?? $_SERVER[$key] ?? getenv($key);
+		$value = getenv($key);
+		if ($value === false)
+		{
+			$value = $_ENV[$key] ?? $_SERVER[$key] ?? false;
+		}
 
 		// Not found? Return the default value
 		if ($value === false)
@@ -404,7 +344,7 @@ if (! function_exists('esc'))
 	 * @param string       $encoding
 	 *
 	 * @return string|array
-	 * @throws InvalidArgumentException
+	 * @throws \InvalidArgumentException
 	 */
 	function esc($data, string $context = 'html', string $encoding = null)
 	{
@@ -428,7 +368,7 @@ if (! function_exists('esc'))
 				return $data;
 			}
 
-			if (! in_array($context, ['html', 'js', 'css', 'url', 'attr'], true))
+			if (! in_array($context, ['html', 'js', 'css', 'url', 'attr']))
 			{
 				throw new InvalidArgumentException('Invalid escape context provided.');
 			}
@@ -475,7 +415,7 @@ if (! function_exists('force_https'))
 	 * @param RequestInterface  $request
 	 * @param ResponseInterface $response
 	 *
-	 * @throws HTTPException
+	 * @throws \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	function force_https(int $duration = 31536000, RequestInterface $request = null, ResponseInterface $response = null)
 	{
@@ -556,24 +496,24 @@ if (! function_exists('function_usable'))
 	 * be just temporary, but would probably be kept for a few years.
 	 *
 	 * @link   http://www.hardened-php.net/suhosin/
-	 * @param  string $functionName Function to check for
+	 * @param  string $function_name Function to check for
 	 * @return boolean    TRUE if the function exists and is safe to call,
 	 *             FALSE otherwise.
 	 *
 	 * @codeCoverageIgnore This is too exotic
 	 */
-	function function_usable(string $functionName): bool
+	function function_usable(string $function_name): bool
 	{
 		static $_suhosin_func_blacklist;
 
-		if (function_exists($functionName))
+		if (function_exists($function_name))
 		{
 			if (! isset($_suhosin_func_blacklist))
 			{
 				$_suhosin_func_blacklist = extension_loaded('suhosin') ? explode(',', trim(ini_get('suhosin.executor.func.blacklist'))) : [];
 			}
 
-			return ! in_array($functionName, $_suhosin_func_blacklist, true);
+			return ! in_array($function_name, $_suhosin_func_blacklist, true);
 		}
 
 		return false;
@@ -592,12 +532,10 @@ if (! function_exists('helper'))
 	 *   3. system/Helpers
 	 *
 	 * @param  string|array $filenames
-	 * @throws FileNotFoundException
+	 * @throws \CodeIgniter\Files\Exceptions\FileNotFoundException
 	 */
 	function helper($filenames)
 	{
-		static $loaded = [];
-
 		$loader = Services::locator(true);
 
 		if (! is_array($filenames))
@@ -621,12 +559,6 @@ if (! function_exists('helper'))
 				$filename .= '_helper';
 			}
 
-			// Check if this helper has already been loaded
-			if (in_array($filename, $loaded, true))
-			{
-				continue;
-			}
-
 			// If the file is namespaced, we'll just grab that
 			// file and not search for any others
 			if (strpos($filename, '\\') !== false)
@@ -639,7 +571,6 @@ if (! function_exists('helper'))
 				}
 
 				$includes[] = $path;
-				$loaded[]   = $filename;
 			}
 
 			// No namespaces, so search in all available locations
@@ -664,7 +595,6 @@ if (! function_exists('helper'))
 						else
 						{
 							$localIncludes[] = $path;
-							$loaded[]        = $filename;
 						}
 					}
 				}
@@ -674,7 +604,6 @@ if (! function_exists('helper'))
 				{
 					// @codeCoverageIgnoreStart
 					$includes[] = $appHelper;
-					$loaded[]   = $filename;
 					// @codeCoverageIgnoreEnd
 				}
 
@@ -685,7 +614,6 @@ if (! function_exists('helper'))
 				if (! empty($systemHelper))
 				{
 					$includes[] = $systemHelper;
-					$loaded[]   = $filename;
 				}
 			}
 		}
@@ -731,7 +659,7 @@ if (! function_exists('is_really_writable'))
 	 *
 	 * @return boolean
 	 *
-	 * @throws             Exception
+	 * @throws             \Exception
 	 * @codeCoverageIgnore Not practical to test, as travis runs on linux
 	 */
 	function is_really_writable(string $file): bool
@@ -759,8 +687,7 @@ if (! function_exists('is_really_writable'))
 
 			return true;
 		}
-
-		if (! is_file($file) || ($fp = @fopen($file, 'ab')) === false)
+		elseif (! is_file($file) || ( $fp = @fopen($file, 'ab')) === false)
 		{
 			return false;
 		}
@@ -777,9 +704,9 @@ if (! function_exists('lang'))
 	 * A convenience method to translate a string or array of them and format
 	 * the result with the intl extension's MessageFormatter.
 	 *
-	 * @param string      $line
-	 * @param array       $args
-	 * @param string|null $locale
+	 * @param string|[] $line
+	 * @param array     $args
+	 * @param string    $locale
 	 *
 	 * @return string
 	 */
@@ -806,9 +733,9 @@ if (! function_exists('log_message'))
 	 *  - info
 	 *  - debug
 	 *
-	 * @param string $level
-	 * @param string $message
-	 * @param array  $context
+	 * @param string     $level
+	 * @param string     $message
+	 * @param array|null $context
 	 *
 	 * @return mixed
 	 */
@@ -834,7 +761,7 @@ if (! function_exists('log_message'))
 if (! function_exists('model'))
 {
 	/**
-	 * More simple way of getting model instances from Factories
+	 * More simple way of getting model instances
 	 *
 	 * @param string                   $name
 	 * @param boolean                  $getShared
@@ -844,7 +771,7 @@ if (! function_exists('model'))
 	 */
 	function model(string $name, bool $getShared = true, ConnectionInterface &$conn = null)
 	{
-		return Factories::models($name, ['getShared' => $getShared], $conn);
+		return \CodeIgniter\Database\ModelFactory::get($name, $getShared, $conn);
 	}
 }
 
@@ -905,17 +832,17 @@ if (! function_exists('redirect'))
 	 *
 	 * If more control is needed, you must use $response->redirect explicitly.
 	 *
-	 * @param string $route
+	 * @param string $uri
 	 *
-	 * @return RedirectResponse
+	 * @return \CodeIgniter\HTTP\RedirectResponse
 	 */
-	function redirect(string $route = null): RedirectResponse
+	function redirect(string $uri = null): RedirectResponse
 	{
-		$response = Services::redirectresponse(null, true);
+		$response = Services::redirectResponse(null, true);
 
-		if (! empty($route))
+		if (! empty($uri))
 		{
-			return $response->route($route);
+			return $response->route($uri);
 		}
 
 		return $response;
@@ -970,7 +897,7 @@ if (! function_exists('route_to'))
 	 * have a route defined in the routes Config file.
 	 *
 	 * @param string $method
-	 * @param mixed  ...$params
+	 * @param array  ...$params
 	 *
 	 * @return false|string
 	 */
@@ -992,7 +919,7 @@ if (! function_exists('session'))
 	 *
 	 * @param string $val
 	 *
-	 * @return Session|mixed|null
+	 * @return \CodeIgniter\Session\Session|mixed|null
 	 */
 	function session(string $val = null)
 	{
@@ -1034,6 +961,7 @@ if (! function_exists('service'))
 if (! function_exists('single_service'))
 {
 	/**
+	 * Allow cleaner access to a Service.
 	 * Always returns a new instance of the class.
 	 *
 	 * @param string     $name
@@ -1043,36 +971,10 @@ if (! function_exists('single_service'))
 	 */
 	function single_service(string $name, ...$params)
 	{
-		$service = Services::serviceExists($name);
+		// Ensure it's NOT a shared instance
+		array_push($params, false);
 
-		if ($service === null)
-		{
-			// The service is not defined anywhere so just return.
-			return null;
-		}
-
-		$method = new ReflectionMethod($service, $name);
-		$count  = $method->getNumberOfParameters();
-		$mParam = $method->getParameters();
-		$params = $params ?? [];
-
-		if ($count === 1)
-		{
-			// This service needs only one argument, which is the shared
-			// instance flag, so let's wrap up and pass false here.
-			return $service::$name(false);
-		}
-
-		// Fill in the params with the defaults, but stop before the last
-		for ($startIndex = count($params); $startIndex <= $count - 2; $startIndex++)
-		{
-			$params[$startIndex] = $mParam[$startIndex]->getDefaultValue();
-		}
-
-		// Ensure the last argument will not create a shared instance
-		$params[$count - 1] = false;
-
-		return $service::$name(...$params);
+		return Services::$name(...$params);
 	}
 }
 
@@ -1149,7 +1051,7 @@ if (! function_exists('timer'))
 	 *
 	 * @param string|null $name
 	 *
-	 * @return Timer|mixed
+	 * @return \CodeIgniter\Debug\Timer|mixed
 	 */
 	function timer(string $name = null)
 	{
@@ -1230,7 +1132,7 @@ if (! function_exists('view_cell'))
 	 * @param string|null $cacheName
 	 *
 	 * @return string
-	 * @throws ReflectionException
+	 * @throws \ReflectionException
 	 */
 	function view_cell(string $library, $params = null, int $ttl = 0, string $cacheName = null): string
 	{

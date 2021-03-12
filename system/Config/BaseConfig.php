@@ -1,22 +1,44 @@
 <?php
 
+
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Config;
-
-use Config\Encryption;
-use Config\Modules;
-use Config\Services;
-use ReflectionClass;
-use ReflectionException;
-use RuntimeException;
 
 /**
  * Class BaseConfig
@@ -29,6 +51,7 @@ use RuntimeException;
  */
 class BaseConfig
 {
+
 	/**
 	 * An optional array of classes that will act as Registrars
 	 * for rapidly setting config class properties.
@@ -47,7 +70,7 @@ class BaseConfig
 	/**
 	 * The modules configuration.
 	 *
-	 * @var Modules
+	 * @var type
 	 */
 	protected static $moduleConfig;
 
@@ -62,7 +85,7 @@ class BaseConfig
 		static::$moduleConfig = config('Modules');
 
 		$properties  = array_keys(get_object_vars($this));
-		$prefix      = static::class;
+		$prefix      = get_class($this);
 		$slashAt     = strrpos($prefix, '\\');
 		$shortPrefix = strtolower(substr($prefix, $slashAt === false ? 0 : $slashAt + 1));
 
@@ -70,28 +93,28 @@ class BaseConfig
 		{
 			$this->initEnvValue($this->$property, $property, $prefix, $shortPrefix);
 
-			if ($this instanceof Encryption && $property === 'key')
+			// Handle hex2bin prefix
+                      if ($shortPrefix === 'encryption' && $property === 'key' && strpos($this->$property, 'hex2bin:') === 0)
 			{
-				// Handle hex2bin prefix
-				if (strpos($this->$property, 'hex2bin:') === 0)
-				{
-					$this->$property = hex2bin(substr($this->$property, 8));
-				}
-				// Handle base64 prefix
-				elseif (strpos($this->$property, 'base64:') === 0)
-				{
-					$this->$property = base64_decode(substr($this->$property, 7), true);
-				}
+				$this->$property = hex2bin(substr($this->$property, 8));
 			}
 		}
 
-		$this->registerProperties();
+		if (defined('ENVIRONMENT') && ENVIRONMENT !== 'testing')
+		{
+			// well, this won't happen during unit testing
+			// @codeCoverageIgnoreStart
+			$this->registerProperties();
+			// @codeCoverageIgnoreEnd
+		}
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Initialization an environment-specific configuration setting
 	 *
-	 * @param mixed  $property
+	 * @param mixed  &$property
 	 * @param string $name
 	 * @param string $prefix
 	 * @param string $shortPrefix
@@ -129,6 +152,8 @@ class BaseConfig
 		return $property;
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Retrieve an environment-specific configuration setting
 	 *
@@ -157,11 +182,13 @@ class BaseConfig
 		}
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Provides external libraries a simple way to register one or more
 	 * options into a config file.
 	 *
-	 * @throws ReflectionException
+	 * @throws \ReflectionException
 	 */
 	protected function registerProperties()
 	{
@@ -172,7 +199,7 @@ class BaseConfig
 
 		if (! static::$didDiscovery)
 		{
-			$locator         = Services::locator();
+			$locator         = \Config\Services::locator();
 			$registrarsFiles = $locator->search('Config/Registrar.php');
 
 			foreach ($registrarsFiles as $file)
@@ -184,7 +211,7 @@ class BaseConfig
 			static::$didDiscovery = true;
 		}
 
-		$shortName = (new ReflectionClass($this))->getShortName();
+		$shortName = (new \ReflectionClass($this))->getShortName();
 
 		// Check the registrar class for a method named after this class' shortName
 		foreach (static::$registrars as $callable)
@@ -192,16 +219,14 @@ class BaseConfig
 			// ignore non-applicable registrars
 			if (! method_exists($callable, $shortName))
 			{
-				// @codeCoverageIgnoreStart
 				continue;
-				// @codeCoverageIgnoreEnd
 			}
 
 			$properties = $callable::$shortName();
 
 			if (! is_array($properties))
 			{
-				throw new RuntimeException('Registrars must return an array of properties and their values.');
+				throw new \RuntimeException('Registrars must return an array of properties and their values.');
 			}
 
 			foreach ($properties as $property => $value)
@@ -217,4 +242,6 @@ class BaseConfig
 			}
 		}
 	}
+
+	//--------------------------------------------------------------------
 }

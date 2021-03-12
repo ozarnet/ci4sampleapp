@@ -1,12 +1,39 @@
 <?php
-
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\HTTP;
@@ -15,9 +42,12 @@ namespace CodeIgniter\HTTP;
  * Class Header
  *
  * Represents a single HTTP header.
+ *
+ * @package CodeIgniter\HTTP
  */
 class Header
 {
+
 	/**
 	 * The name of the header.
 	 *
@@ -43,8 +73,8 @@ class Header
 	 */
 	public function __construct(string $name, $value = null)
 	{
-		$this->name = $name;
-		$this->setValue($value);
+		$this->name  = $name;
+		$this->value = $value;
 	}
 
 	//--------------------------------------------------------------------
@@ -65,7 +95,7 @@ class Header
 	 * Gets the raw value of the header. This may return either a string
 	 * of an array, depending on whether the header has multiple values or not.
 	 *
-	 * @return array|string
+	 * @return array|null|string
 	 */
 	public function getValue()
 	{
@@ -93,13 +123,13 @@ class Header
 	/**
 	 * Sets the value of the header, overwriting any previous value(s).
 	 *
-	 * @param string|array|null $value
+	 * @param null $value
 	 *
 	 * @return $this
 	 */
 	public function setValue($value = null)
 	{
-		$this->value = $value ?? '';
+		$this->value = $value;
 
 		return $this;
 	}
@@ -110,26 +140,18 @@ class Header
 	 * Appends a value to the list of values for this header. If the
 	 * header is a single value string, it will be converted to an array.
 	 *
-	 * @param string|array|null $value
+	 * @param null $value
 	 *
 	 * @return $this
 	 */
 	public function appendValue($value = null)
 	{
-		if ($value === null)
-		{
-			return $this;
-		}
-
 		if (! is_array($this->value))
 		{
 			$this->value = [$this->value];
 		}
 
-		if (! in_array($value, $this->value, true))
-		{
-			$this->value[] = $value;
-		}
+		$this->value[] = $value;
 
 		return $this;
 	}
@@ -140,17 +162,12 @@ class Header
 	 * Prepends a value to the list of values for this header. If the
 	 * header is a single value string, it will be converted to an array.
 	 *
-	 * @param string|array|null $value
+	 * @param null $value
 	 *
 	 * @return $this
 	 */
 	public function prependValue($value = null)
 	{
-		if ($value === null)
-		{
-			return $this;
-		}
-
 		if (! is_array($this->value))
 		{
 			$this->value = [$this->value];
@@ -178,7 +195,7 @@ class Header
 		{
 			return $this->value;
 		}
-		if (! is_array($this->value))
+		else if (! is_array($this->value))
 		{
 			return '';
 		}
@@ -191,12 +208,12 @@ class Header
 			{
 				$options[] = $key . '=' . $value;
 			}
-			elseif (is_array($value))
+			else if (is_array($value))
 			{
 				$key       = key($value);
 				$options[] = $key . '=' . $value[$key];
 			}
-			elseif (is_numeric($key))
+			else if (is_numeric($key))
 			{
 				$options[] = $value;
 			}

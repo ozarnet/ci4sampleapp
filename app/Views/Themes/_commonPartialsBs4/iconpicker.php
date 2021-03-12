@@ -5,5 +5,5 @@
 
 <!-- Push section js -->
 <?= $this->section('js') ?>
-<script src="https://cdn.jsdelivr.net/npm/fontawesome-iconpicker@3.2.0/dist/js/fontawesome-iconpicker.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/fontawesome-iconpicker@3.2.0/dist/js/fontawesome-iconpicker.min.js"></script>
 <?= $this->endSection() ?>

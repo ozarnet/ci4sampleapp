@@ -1,21 +1,7 @@
-<?php
+<?php namespace CodeIgniter\Test\Mock;
 
-/**
- * This file is part of the CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+class MockTable extends \CodeIgniter\View\Table {
 
-namespace CodeIgniter\Test\Mock;
-
-use BadMethodCallException;
-use CodeIgniter\View\Table;
-
-class MockTable extends Table
-{
 	// Override inaccessible protected method
 	public function __call($method, $params)
 	{
@@ -26,4 +12,5 @@ class MockTable extends Table
 
 		throw new BadMethodCallException('Method ' . $method . ' was not found');
 	}
+
 }

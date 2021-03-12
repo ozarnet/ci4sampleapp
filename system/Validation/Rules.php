@@ -1,21 +1,50 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Validation;
 
 use Config\Database;
-use InvalidArgumentException;
 
 /**
  * Validation Rules.
+ *
+ * @package CodeIgniter\Validation
  */
 class Rules
 {
@@ -32,11 +61,6 @@ class Rules
 	 */
 	public function differs(string $str = null, string $field, array $data): bool
 	{
-		if (strpos($field, '.') !== false)
-		{
-			return $str !== dot_array_search($field, $data);
-		}
-
 		return array_key_exists($field, $data) && $str !== $data[$field];
 	}
 
@@ -71,7 +95,7 @@ class Rules
 		$val = explode(',', $val);
 		foreach ($val as $tmp)
 		{
-			if (is_numeric($tmp) && (int) $tmp === mb_strlen($str))
+			if (is_numeric($tmp) && (int)$tmp === mb_strlen($str))
 			{
 				return true;
 			}
@@ -130,7 +154,7 @@ class Rules
 	public function is_not_unique(string $str = null, string $field, array $data): bool
 	{
 		// Grab any data for exclusion of a single row.
-		list($field, $whereField, $whereValue) = array_pad(explode(',', $field), 3, null);
+		list($field, $where_field, $where_value) = array_pad(explode(',', $field), 3, null);
 
 		// Break the table and field apart
 		sscanf($field, '%[^.].%[^.]', $table, $field);
@@ -142,15 +166,16 @@ class Rules
 				  ->where($field, $str)
 				  ->limit(1);
 
-		if (! empty($whereField) && ! empty($whereValue))
+		if (! empty($where_field) && ! empty($where_value))
 		{
-			if (! preg_match('/^\{(\w+)\}$/', $whereValue))
+			if (! preg_match('/^\{(\w+)\}$/', $where_value))
 			{
-				$row = $row->where($whereField, $whereValue);
+				$row = $row->where($where_field, $where_value);
 			}
 		}
 
-		return (bool) ($row->get()->getRow() !== null);
+		return (bool) ($row->get()
+						->getRow() !== null);
 	}
 
 	//--------------------------------------------------------------------
@@ -165,7 +190,10 @@ class Rules
 	 */
 	public function in_list(string $value = null, string $list): bool
 	{
-		$list = array_map('trim', explode(',', $list));
+		$list = explode(',', $list);
+		$list = array_map(function ($value) {
+			return trim($value);
+		}, $list);
 		return in_array($value, $list, true);
 	}
 
@@ -209,7 +237,8 @@ class Rules
 			}
 		}
 
-		return (bool) ($row->get()->getRow() === null);
+		return (bool) ($row->get()
+						->getRow() === null);
 	}
 
 	//--------------------------------------------------------------------
@@ -255,11 +284,6 @@ class Rules
 	 */
 	public function matches(string $str = null, string $field, array $data): bool
 	{
-		if (strpos($field, '.') !== false)
-		{
-			return $str === dot_array_search($field, $data);
-		}
-
 		return array_key_exists($field, $data) && $str === $data[$field];
 	}
 
@@ -275,7 +299,7 @@ class Rules
 	 */
 	public function max_length(string $str = null, string $val): bool
 	{
-		return (is_numeric($val) && $val >= mb_strlen($str));
+		return ($val >= mb_strlen($str));
 	}
 
 	//--------------------------------------------------------------------
@@ -290,7 +314,7 @@ class Rules
 	 */
 	public function min_length(string $str = null, string $val): bool
 	{
-		return (is_numeric($val) && $val <= mb_strlen($str));
+		return ($val <= mb_strlen($str));
 	}
 
 	//--------------------------------------------------------------------
@@ -306,21 +330,6 @@ class Rules
 	public function not_equals(string $str = null, string $val): bool
 	{
 		return $str !== $val;
-	}
-
-	//--------------------------------------------------------------------
-
-	/**
-	 * Value should not be within an array of values.
-	 *
-	 * @param string $value
-	 * @param string $list
-	 *
-	 * @return boolean
-	 */
-	public function not_in_list(string $value = null, string $list): bool
-	{
-		return ! $this->in_list($value, $list);
 	}
 
 	//--------------------------------------------------------------------
@@ -352,19 +361,14 @@ class Rules
 	 *
 	 *     required_with[password]
 	 *
-	 * @param string|null $str
-	 * @param string|null $fields List of fields that we should check if present
-	 * @param array       $data   Complete list of fields from the form
+	 * @param $str
+	 * @param string $fields List of fields that we should check if present
+	 * @param array  $data   Complete list of fields from the form
 	 *
 	 * @return boolean
 	 */
-	public function required_with($str = null, string $fields = null, array $data = []): bool
+	public function required_with($str = null, string $fields, array $data): bool
 	{
-		if (is_null($fields) || empty($data))
-		{
-			throw new InvalidArgumentException('You must supply the parameters: fields, data.');
-		}
-
 		$fields = explode(',', $fields);
 
 		// If the field is present we can safely assume that
@@ -384,14 +388,17 @@ class Rules
 
 		foreach ($fields as $field)
 		{
-			if (
-				(array_key_exists($field, $data) && ! empty($data[$field])) ||
-				(strpos($field, '.') !== false && ! empty(dot_array_search($field, $data)))	
-			)
+			if (array_key_exists($field, $data))
 			{
 				$requiredFields[] = $field;
 			}
 		}
+
+		// Remove any keys with empty values since, that means they
+		// weren't truly there, as far as this is concerned.
+		$requiredFields = array_filter($requiredFields, function ($item) use ($data) {
+			return ! empty($data[$item]);
+		});
 
 		return empty($requiredFields);
 	}
@@ -406,19 +413,14 @@ class Rules
 	 *
 	 *     required_without[id,email]
 	 *
-	 * @param string|null $str
-	 * @param string|null $fields
-	 * @param array       $data
+	 * @param $str
+	 * @param string $fields
+	 * @param array  $data
 	 *
 	 * @return boolean
 	 */
-	public function required_without($str = null, string $fields = null, array $data = []): bool
+	public function required_without($str = null, string $fields, array $data): bool
 	{
-		if (is_null($fields) || empty($data))
-		{
-			throw new InvalidArgumentException('You must supply the parameters: fields, data.');
-		}
-
 		$fields = explode(',', $fields);
 
 		// If the field is present we can safely assume that
@@ -435,10 +437,7 @@ class Rules
 		// any of the fields are not present in $data
 		foreach ($fields as $field)
 		{
-			if (
-				(strpos($field, '.') === false && (! array_key_exists($field, $data) || empty($data[$field]))) ||
-				(strpos($field, '.') !== false && empty(dot_array_search($field, $data)))
-			)
+			if (! array_key_exists($field, $data))
 			{
 				return false;
 			}

@@ -1,25 +1,53 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Session\Handlers;
 
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Session\Exceptions\SessionException;
-use Config\App as AppConfig;
-use Exception;
 
 /**
  * Session handler using file system for storage
  */
-class FileHandler extends BaseHandler
+class FileHandler extends BaseHandler implements \SessionHandlerInterface
 {
+
 	/**
 	 * Where to save the session files to.
 	 *
@@ -30,14 +58,14 @@ class FileHandler extends BaseHandler
 	/**
 	 * The file handle
 	 *
-	 * @var resource|null
+	 * @var resource
 	 */
 	protected $fileHandle;
 
 	/**
 	 * File Name
 	 *
-	 * @var string
+	 * @var resource
 	 */
 	protected $filePath;
 
@@ -55,22 +83,15 @@ class FileHandler extends BaseHandler
 	 */
 	protected $matchIP = false;
 
-	/**
-	 * Regex of session ID
-	 *
-	 * @var string
-	 */
-	protected $sessionIDRegex = '';
-
 	//--------------------------------------------------------------------
 
 	/**
 	 * Constructor
 	 *
-	 * @param AppConfig $config
-	 * @param string    $ipAddress
+	 * @param BaseConfig $config
+	 * @param string     $ipAddress
 	 */
-	public function __construct(AppConfig $config, string $ipAddress)
+	public function __construct($config, string $ipAddress)
 	{
 		parent::__construct($config, $ipAddress);
 
@@ -107,7 +128,7 @@ class FileHandler extends BaseHandler
 	 * @param string $name     Session cookie name
 	 *
 	 * @return boolean
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function open($savePath, $name): bool
 	{
@@ -140,9 +161,9 @@ class FileHandler extends BaseHandler
 	 *
 	 * @param string $sessionID Session ID
 	 *
-	 * @return string|boolean    Serialized session data
+	 * @return string    Serialized session data
 	 */
-	public function read($sessionID)
+	public function read($sessionID): string
 	{
 		// This might seem weird, but PHP 5.6 introduced session_reset(),
 		// which re-reads session data
@@ -167,7 +188,7 @@ class FileHandler extends BaseHandler
 			}
 
 			// Needed by write() to detect session_regenerate_id() calls
-			if (is_null($this->sessionID)) // @phpstan-ignore-line
+			if (is_null($this->sessionID))
 			{
 				$this->sessionID = $sessionID;
 			}
@@ -185,7 +206,7 @@ class FileHandler extends BaseHandler
 			rewind($this->fileHandle);
 		}
 
-		$sessionData = '';
+		$session_data = '';
 		clearstatcache();    // Address https://github.com/codeigniter4/CodeIgniter4/issues/2056
 		for ($read = 0, $length = filesize($this->filePath . $sessionID); $read < $length; $read += strlen($buffer))
 		{
@@ -194,12 +215,12 @@ class FileHandler extends BaseHandler
 				break;
 			}
 
-			$sessionData .= $buffer;
+			$session_data .= $buffer;
 		}
 
-		$this->fingerprint = md5($sessionData);
+		$this->fingerprint = md5($session_data);
 
-		return $sessionData;
+		return $session_data;
 	}
 
 	//--------------------------------------------------------------------
@@ -226,8 +247,7 @@ class FileHandler extends BaseHandler
 		{
 			return false;
 		}
-
-		if ($this->fingerprint === md5($sessionData))
+		elseif ($this->fingerprint === md5($sessionData))
 		{
 			return ($this->fileNew) ? true : touch($this->filePath . $sessionID);
 		}
@@ -248,7 +268,7 @@ class FileHandler extends BaseHandler
 				}
 			}
 
-			if (! is_int($result)) // @phpstan-ignore-line
+			if (! is_int($result))
 			{
 				$this->fingerprint = md5(substr($sessionData, 0, $written));
 				$this->logger->error('Session: Unable to write data.');
@@ -278,8 +298,7 @@ class FileHandler extends BaseHandler
 			flock($this->fileHandle, LOCK_UN);
 			fclose($this->fileHandle);
 
-			$this->fileHandle = null;
-			$this->fileNew    = false;
+			$this->fileHandle = $this->fileNew = null;
 
 			return true;
 		}
@@ -294,24 +313,23 @@ class FileHandler extends BaseHandler
 	 *
 	 * Destroys the current session.
 	 *
-	 * @param string $sessionId Session ID
+	 * @param string $session_id Session ID
 	 *
 	 * @return boolean
 	 */
-	public function destroy($sessionId): bool
+	public function destroy($session_id): bool
 	{
 		if ($this->close())
 		{
-			return is_file($this->filePath . $sessionId)
-				? (unlink($this->filePath . $sessionId) && $this->destroyCookie()) : true;
+			return is_file($this->filePath . $session_id)
+				? (unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
 		}
-
-		if ($this->filePath !== null)
+		elseif ($this->filePath !== null)
 		{
 			clearstatcache();
 
-			return is_file($this->filePath . $sessionId)
-				? (unlink($this->filePath . $sessionId) && $this->destroyCookie()) : true;
+			return is_file($this->filePath . $session_id)
+				? (unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
 		}
 
 		return false;
@@ -375,14 +393,14 @@ class FileHandler extends BaseHandler
 	 */
 	protected function configureSessionIDRegex()
 	{
-		$bitsPerCharacter = (int) ini_get('session.sid_bits_per_character');
-		$SIDLength        = (int) ini_get('session.sid_length');
+		$bitsPerCharacter = (int)ini_get('session.sid_bits_per_character');
+		$SIDLength        = (int)ini_get('session.sid_length');
 
 		if (($bits = $SIDLength * $bitsPerCharacter) < 160)
 		{
 			// Add as many more characters as necessary to reach at least 160 bits
-			$SIDLength += (int) ceil((160 % $bits) / $bitsPerCharacter);
-			ini_set('session.sid_length', (string) $SIDLength);
+			$SIDLength += (int)ceil((160 % $bits) / $bitsPerCharacter);
+			ini_set('session.sid_length', $SIDLength);
 		}
 
 		// Yes, 4,5,6 are the only known possible values as of 2016-10-27

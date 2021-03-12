@@ -1,25 +1,84 @@
 <?php
-
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 3.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\RESTful;
 
+use CodeIgniter\Controller;
+use CodeIgniter\HTTP\RequestInterface;
+use CodeIgniter\HTTP\ResponseInterface;
+use Psr\Log\LoggerInterface;
+
 /**
  * An extendable controller to help provide a UI for a resource.
+ *
+ * @package CodeIgniter\RESTful
  */
-class ResourcePresenter extends BaseResource
+class ResourcePresenter extends Controller
 {
+
+	/**
+	 *
+	 * @var string Name of the model class managing this resource's data
+	 */
+	protected $modelName;
+
+	/**
+	 *
+	 * @var \CodeIgniter\Model the model holding this resource's data
+	 */
+	protected $model;
+
+	//--------------------------------------------------------------------
+
+	public function initController(RequestInterface $request, ResponseInterface $response, LoggerInterface $logger)
+	{
+		parent::initController($request, $response, $logger);
+
+		// instantiate our model, if needed
+		$this->setModel($this->modelName);
+	}
+
+	//--------------------------------------------------------------------
+
 	/**
 	 * Present a view of resource objects
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public function index()
 	{
@@ -29,9 +88,8 @@ class ResourcePresenter extends BaseResource
 	/**
 	 * Present a view to present a specific resource object
 	 *
-	 * @param mixed $id
-	 *
-	 * @return mixed
+	 * @param  type $id
+	 * @return string
 	 */
 	public function show($id = null)
 	{
@@ -41,7 +99,7 @@ class ResourcePresenter extends BaseResource
 	/**
 	 * Present a view to present a new single resource object
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public function new()
 	{
@@ -52,7 +110,7 @@ class ResourcePresenter extends BaseResource
 	 * Process the creation/insertion of a new resource object.
 	 * This should be a POST.
 	 *
-	 * @return mixed
+	 * @return string
 	 */
 	public function create()
 	{
@@ -60,11 +118,32 @@ class ResourcePresenter extends BaseResource
 	}
 
 	/**
+	 * Present a view to confirm the deletion of a specific resource object
+	 *
+	 * @param  type $id
+	 * @return string
+	 */
+	public function remove($id = null)
+	{
+		return lang('RESTful.notImplemented', ['remove']);
+	}
+
+	/**
+	 * Process the deletion of a specific resource object
+	 *
+	 * @param  type $id
+	 * @return string
+	 */
+	public function delete($id = null)
+	{
+		return lang('RESTful.notImplemented', ['delete']);
+	}
+
+	/**
 	 * Present a view to edit the properties of a specific resource object
 	 *
-	 * @param mixed $id
-	 *
-	 * @return mixed
+	 * @param  type $id
+	 * @return string
 	 */
 	public function edit($id = null)
 	{
@@ -75,36 +154,53 @@ class ResourcePresenter extends BaseResource
 	 * Process the updating, full or partial, of a specific resource object.
 	 * This should be a POST.
 	 *
-	 * @param mixed $id
-	 *
-	 * @return mixed
+	 * @param  type $id
+	 * @return string
 	 */
 	public function update($id = null)
 	{
 		return lang('RESTful.notImplemented', ['update']);
 	}
 
-	/**
-	 * Present a view to confirm the deletion of a specific resource object
-	 *
-	 * @param mixed $id
-	 *
-	 * @return mixed
-	 */
-	public function remove($id = null)
-	{
-		return lang('RESTful.notImplemented', ['remove']);
-	}
+	//--------------------------------------------------------------------
 
 	/**
-	 * Process the deletion of a specific resource object
+	 * Set or change the model this controller is bound to.
+	 * Given either the name or the object, determine the other.
 	 *
-	 * @param mixed $id
-	 *
-	 * @return mixed
+	 * @param string|object $which
 	 */
-	public function delete($id = null)
+	public function setModel($which = null)
 	{
-		return lang('RESTful.notImplemented', ['delete']);
+		// save what we have been given
+		if (! empty($which))
+		{
+			if (is_object($which))
+			{
+				$this->model     = $which;
+				$this->modelName = null;
+			}
+			else
+			{
+				$this->model     = null;
+				$this->modelName = $which;
+			}
+		}
+
+		// make a model object if needed
+		if (empty($this->model) && ! empty($this->modelName))
+		{
+			if (class_exists($this->modelName))
+			{
+				$this->model = model($this->modelName);
+			}
+		}
+
+		// determine model name if needed
+		if (empty($this->modelName) && ! empty($this->model))
+		{
+			$this->modelName = get_class($this->model);
+		}
 	}
+
 }

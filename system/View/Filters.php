@@ -1,12 +1,40 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\View;
@@ -22,7 +50,7 @@ class Filters
 	/**
 	 * Returns $value as all lowercase with the first letter capitalized.
 	 *
-	 * @param string $value
+	 * @param $value
 	 *
 	 * @return string
 	 */
@@ -36,7 +64,7 @@ class Filters
 	/**
 	 * Formats a date into the given $format.
 	 *
-	 * @param mixed  $value
+	 * @param $value
 	 * @param string $format
 	 *
 	 * @return string
@@ -60,13 +88,13 @@ class Filters
 	 * Example:
 	 *      my_date|date_modify(+1 day)
 	 *
-	 * @param string $value
+	 * @param $value
 	 * @param string $adjustment
 	 *
-	 * @return   integer|false
+	 * @return   string
 	 * @internal param string $format
 	 */
-	public static function date_modify($value, string $adjustment)
+	public static function date_modify($value, string $adjustment): string
 	{
 		$value = static::date($value, 'Y-m-d H:i:s');
 
@@ -78,7 +106,7 @@ class Filters
 	/**
 	 * Returns the given default value if $value is empty or undefined.
 	 *
-	 * @param mixed  $value
+	 * @param $value
 	 * @param string $default
 	 *
 	 * @return string
@@ -95,7 +123,7 @@ class Filters
 	/**
 	 * Escapes the given value with our `esc()` helper function.
 	 *
-	 * @param string $value
+	 * @param $value
 	 * @param string $context
 	 *
 	 * @return string
@@ -145,7 +173,7 @@ class Filters
 	/**
 	 * Highlights code samples with HTML/CSS.
 	 *
-	 * @param string $value
+	 * @param $value
 	 *
 	 * @return string
 	 */
@@ -162,7 +190,7 @@ class Filters
 	 * Limits the number of characters to $limit, and trails of with an ellipsis.
 	 * Will break at word break so may be more or less than $limit.
 	 *
-	 * @param string  $value
+	 * @param $value
 	 * @param integer $limit
 	 *
 	 * @return string
@@ -179,7 +207,7 @@ class Filters
 	/**
 	 * Limits the number of words to $limit, and trails of with an ellipsis.
 	 *
-	 * @param string  $value
+	 * @param $value
 	 * @param integer $limit
 	 *
 	 * @return string
@@ -196,10 +224,10 @@ class Filters
 	/**
 	 * Returns the $value displayed in a localized manner.
 	 *
-	 * @param integer|float $value
-	 * @param integer       $precision
-	 * @param string        $type
-	 * @param string|null   $locale
+	 * @param $value
+	 * @param integer     $precision
+	 * @param string      $type
+	 * @param string|null $locale
 	 *
 	 * @return string
 	 */
@@ -225,10 +253,10 @@ class Filters
 	/**
 	 * Returns the $value displayed as a currency string.
 	 *
-	 * @param integer|float $value
-	 * @param string        $currency
-	 * @param string|null   $locale
-	 * @param integer       $fraction
+	 * @param $value
+	 * @param string      $currency
+	 * @param string|null $locale
+	 * @param integer     $fraction
 	 *
 	 * @return string
 	 */
@@ -290,9 +318,9 @@ class Filters
 	 * @param mixed  $precision
 	 * @param string $type
 	 *
-	 * @return string|float
+	 * @return string
 	 */
-	public static function round(string $value, $precision = 2, string $type = 'common')
+	public static function round(string $value, $precision = 2, string $type = 'common'): string
 	{
 		if (! is_numeric($precision))
 		{
@@ -303,11 +331,11 @@ class Filters
 		switch ($type)
 		{
 			case 'common':
-				return round((float) $value, $precision);
+				return round($value, $precision);
 			case 'ceil':
-				return ceil((float) $value);
+				return ceil($value);
 			case 'floor':
-				return floor((float) $value);
+				return floor($value);
 		}
 
 		// Still here, just return the value.

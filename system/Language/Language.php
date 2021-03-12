@@ -1,26 +1,55 @@
 <?php
-
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Language;
 
 use Config\Services;
-use MessageFormatter;
 
 /**
  * Handle system messages and localization.
  *
  * Locale-based, built on top of PHP internationalization.
+ *
+ * @package CodeIgniter\Language
  */
 class Language
 {
+
 	/**
 	 * Stores the retrieved language lines
 	 * from files for faster retrieval on
@@ -59,10 +88,10 @@ class Language
 	{
 		$this->locale = $locale;
 
-		if (class_exists('MessageFormatter'))
+		if (class_exists('\MessageFormatter'))
 		{
 			$this->intlSupport = true;
-		}
+		};
 	}
 
 	//--------------------------------------------------------------------
@@ -107,23 +136,29 @@ class Language
 	 */
 	public function getLine(string $line, array $args = [])
 	{
-		// if no file is given, just parse the line
-		if (strpos($line, '.') === false)
+		// ignore requests with no file specified
+		if (! strpos($line, '.'))
 		{
-			return $this->formatMessage($line, $args);
+			return $line;
 		}
 
 		// Parse out the file name and the actual alias.
 		// Will load the language file and strings.
-		list($file, $parsedLine) = $this->parseLine($line, $this->locale);
+		[
+			$file,
+			$parsedLine,
+		] = $this->parseLine($line, $this->locale);
 
 		$output = $this->getTranslationOutput($this->locale, $file, $parsedLine);
 
 		if ($output === null && strpos($this->locale, '-'))
 		{
-			list($locale) = explode('-', $this->locale, 2);
+			[$locale] = explode('-', $this->locale, 2);
 
-			list($file, $parsedLine) = $this->parseLine($line, $locale);
+			[
+				$file,
+				$parsedLine,
+			] = $this->parseLine($line, $locale);
 
 			$output = $this->getTranslationOutput($locale, $file, $parsedLine);
 		}
@@ -131,14 +166,21 @@ class Language
 		// if still not found, try English
 		if ($output === null)
 		{
-			list($file, $parsedLine) = $this->parseLine($line, 'en');
-
+			[
+				$file,
+				$parsedLine,
+			]       = $this->parseLine($line, 'en');
 			$output = $this->getTranslationOutput('en', $file, $parsedLine);
 		}
 
 		$output = $output ?? $line;
 
-		return $this->formatMessage($output, $args);
+		if (! empty($args))
+		{
+			$output = $this->formatMessage($output, $args);
+		}
+
+		return $output;
 	}
 
 	//--------------------------------------------------------------------
@@ -216,7 +258,7 @@ class Language
 	 */
 	protected function formatMessage($message, array $args = [])
 	{
-		if (! $this->intlSupport || $args === [])
+		if (! $this->intlSupport || ! $args)
 		{
 			return $message;
 		}
@@ -227,11 +269,10 @@ class Language
 			{
 				$message[$index] = $this->formatMessage($value, $args);
 			}
-
 			return $message;
 		}
 
-		return MessageFormatter::formatMessage($this->locale, $message, $args);
+		return \MessageFormatter::formatMessage($this->locale, $message, $args);
 	}
 
 	//--------------------------------------------------------------------
@@ -245,7 +286,7 @@ class Language
 	 * @param string  $locale
 	 * @param boolean $return
 	 *
-	 * @return void|array
+	 * @return array|null
 	 */
 	protected function load(string $file, string $locale, bool $return = false)
 	{
@@ -254,7 +295,7 @@ class Language
 			$this->loadedFiles[$locale] = [];
 		}
 
-		if (in_array($file, $this->loadedFiles[$locale], true))
+		if (in_array($file, $this->loadedFiles[$locale]))
 		{
 			// Don't load it more than once.
 			return [];

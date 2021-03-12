@@ -1,19 +1,45 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\CLI;
 
 use CodeIgniter\CLI\Exceptions\CLIException;
-use Config\Services;
-use Throwable;
 
 /**
  * Set of static methods useful for CLI request handling.
@@ -32,9 +58,12 @@ use Throwable;
  * The wait() method is mostly testable, as long as you don't give it
  * an argument of "0".
  * These have been flagged to ignore for code coverage purposes.
+ *
+ * @package CodeIgniter\CLI
  */
 class CLI
 {
+
 	/**
 	 * Is the readline library on the system?
 	 *
@@ -114,21 +143,21 @@ class CLI
 	 * output was a "write" or a "print" to
 	 * keep the output clean and as expected.
 	 *
-	 * @var string|null
+	 * @var string
 	 */
 	protected static $lastWrite;
 
 	/**
 	 * Height of the CLI window
 	 *
-	 * @var integer|null
+	 * @var integer
 	 */
 	protected static $height;
 
 	/**
 	 * Width of the CLI window
 	 *
-	 * @var integer|null
+	 * @var integer
 	 */
 	protected static $width;
 
@@ -228,38 +257,37 @@ class CLI
 	 */
 	public static function prompt(string $field, $options = null, string $validation = null): string
 	{
-		$extraOutput = '';
-		$default     = '';
+		$extra_output = '';
+		$default      = '';
 
 		if (is_string($options))
 		{
-			$extraOutput = ' [' . static::color($options, 'white') . ']';
-			$default     = $options;
+			$extra_output = ' [' . static::color($options, 'white') . ']';
+			$default      = $options;
 		}
 
 		if (is_array($options) && $options)
 		{
-			$opts               = $options;
-			$extraOutputDefault = static::color($opts[0], 'white');
+			$opts                 = $options;
+			$extra_output_default = static::color($opts[0], 'white');
 
 			unset($opts[0]);
 
 			if (empty($opts))
 			{
-				$extraOutput = $extraOutputDefault;
+				$extra_output = $extra_output_default;
 			}
 			else
 			{
-				$extraOutput = ' [' . $extraOutputDefault . ', ' . implode(', ', $opts) . ']';
-				$validation .= '|in_list[' . implode(',', $options) . ']';
-
-				$validation = trim($validation, '|');
+				$extra_output = ' [' . $extra_output_default . ', ' . implode(', ', $opts) . ']';
+				$validation  .= '|in_list[' . implode(',', $options) . ']';
+				$validation   = trim($validation, '|');
 			}
 
 			$default = $options[0];
 		}
 
-		static::fwrite(STDOUT, $field . $extraOutput . ': ');
+		static::fwrite(STDOUT, $field . $extra_output . ': ');
 
 		// Read the input from keyboard.
 		$input = trim(static::input()) ?: $default;
@@ -292,7 +320,7 @@ class CLI
 	{
 		$label      = $field;
 		$field      = 'temp';
-		$validation = Services::validation(null, false);
+		$validation = \Config\Services::validation(null, false);
 		$validation->setRule($field, $label, $rules);
 		$validation->run([$field => $value]);
 
@@ -356,9 +384,9 @@ class CLI
 	/**
 	 * Outputs an error to the CLI using STDERR instead of STDOUT
 	 *
-	 * @param string      $text       The text to output, or array of errors
-	 * @param string      $foreground
-	 * @param string|null $background
+	 * @param string|array $text       The text to output, or array of errors
+	 * @param string       $foreground
+	 * @param string       $background
 	 */
 	public static function error(string $text, string $foreground = 'light_red', string $background = null)
 	{
@@ -581,7 +609,7 @@ class CLI
 
 		$string = strtr($string, ["\033[4m" => '', "\033[0m" => '']);
 
-		return mb_strwidth($string);
+		return mb_strlen($string);
 	}
 
 	//--------------------------------------------------------------------
@@ -698,63 +726,50 @@ class CLI
 	 */
 	public static function generateDimensions()
 	{
-		try
+		if (static::isWindows())
 		{
-			if (static::isWindows())
+			// Shells such as `Cygwin` and `Git bash` returns incorrect values
+			// when executing `mode CON`, so we use `tput` instead
+			// @codeCoverageIgnoreStart
+			if (($shell = getenv('SHELL')) && preg_match('/(?:bash|zsh)(?:\.exe)?$/', $shell) || getenv('TERM'))
 			{
-				// Shells such as `Cygwin` and `Git bash` returns incorrect values
-				// when executing `mode CON`, so we use `tput` instead
-				// @codeCoverageIgnoreStart
-				if (($shell = getenv('SHELL')) && preg_match('/(?:bash|zsh)(?:\.exe)?$/', $shell) || getenv('TERM'))
-				{
-					static::$height = (int) exec('tput lines');
-					static::$width  = (int) exec('tput cols');
-				}
-				else
-				{
-					$return = -1;
-					$output = [];
-					exec('mode CON', $output, $return);
-
-					if ($return === 0 && $output)
-					{
-						// Look for the next lines ending in ": <number>"
-						// Searching for "Columns:" or "Lines:" will fail on non-English locales
-						if (preg_match('/:\s*(\d+)\n[^:]+:\s*(\d+)\n/', implode("\n", $output), $matches))
-						{
-							static::$height = (int) $matches[1];
-							static::$width  = (int) $matches[2];
-						}
-					}
-				}
-				// @codeCoverageIgnoreEnd
+				static::$height = (int) exec('tput lines');
+				static::$width  = (int) exec('tput cols');
 			}
 			else
 			{
-				if (($size = exec('stty size')) && preg_match('/(\d+)\s+(\d+)/', $size, $matches))
+				$return = -1;
+				$output = [];
+				exec('mode CON', $output, $return);
+
+				if ($return === 0 && $output)
 				{
-					static::$height = (int) $matches[1];
-					static::$width  = (int) $matches[2];
-				}
-				else
-				{
-					// @codeCoverageIgnoreStart
-					static::$height = (int) exec('tput lines');
-					static::$width  = (int) exec('tput cols');
-					// @codeCoverageIgnoreEnd
+					// Look for the next lines ending in ": <number>"
+					// Searching for "Columns:" or "Lines:" will fail on non-English locales
+					if (preg_match('/:\s*(\d+)\n[^:]+:\s*(\d+)\n/', implode("\n", $output), $matches))
+					{
+						static::$height = (int) $matches[1];
+						static::$width  = (int) $matches[2];
+					}
 				}
 			}
+			// @codeCoverageIgnoreEnd
 		}
-		// @codeCoverageIgnoreStart
-		catch (Throwable $e)
+		else
 		{
-			// Reset the dimensions so that the default values will be returned later.
-			// Then let the developer know of the error.
-			static::$height = null;
-			static::$width  = null;
-			log_message('error', $e->getMessage());
+			if (($size = exec('stty size')) && preg_match('/(\d+)\s+(\d+)/', $size, $matches))
+			{
+				static::$height = (int) $matches[1];
+				static::$width  = (int) $matches[2];
+			}
+			else
+			{
+				// @codeCoverageIgnoreStart
+				static::$height = (int) exec('tput lines');
+				static::$width  = (int) exec('tput cols');
+				// @codeCoverageIgnoreEnd
+			}
 		}
-		// @codeCoverageIgnoreEnd
 	}
 
 	//--------------------------------------------------------------------
@@ -783,7 +798,7 @@ class CLI
 			$thisStep   = abs($thisStep);
 			$totalSteps = $totalSteps < 1 ? 1 : $totalSteps;
 
-			$percent = (int) (($thisStep / $totalSteps) * 100);
+			$percent = intval(($thisStep / $totalSteps) * 100);
 			$step    = (int) round($percent / 10);
 
 			// Write the progress bar
@@ -810,11 +825,11 @@ class CLI
 	 *
 	 * @param string  $string
 	 * @param integer $max
-	 * @param integer $padLeft
+	 * @param integer $pad_left
 	 *
 	 * @return string
 	 */
-	public static function wrap(string $string = null, int $max = 0, int $padLeft = 0): string
+	public static function wrap(string $string = null, int $max = 0, int $pad_left = 0): string
 	{
 		if (empty($string))
 		{
@@ -831,20 +846,20 @@ class CLI
 			$max = CLI::getWidth();
 		}
 
-		$max = $max - $padLeft;
+		$max = $max - $pad_left;
 
 		$lines = wordwrap($string, $max, PHP_EOL);
 
-		if ($padLeft > 0)
+		if ($pad_left > 0)
 		{
 			$lines = explode(PHP_EOL, $lines);
 
 			$first = true;
 
-			array_walk($lines, function (&$line, $index) use ($padLeft, &$first) {
+			array_walk($lines, function (&$line, $index) use ($pad_left, &$first) {
 				if (! $first)
 				{
-					$line = str_repeat(' ', $padLeft) . $line;
+					$line = str_repeat(' ', $pad_left) . $line;
 				}
 				else
 				{
@@ -866,41 +881,32 @@ class CLI
 	/**
 	 * Parses the command line it was called from and collects all
 	 * options and valid segments.
+	 *
+	 * I tried to use getopt but had it fail occasionally to find any
+	 * options but argc has always had our back. We don't have all of the power
+	 * of getopt but this does us just fine.
 	 */
 	protected static function parseCommandLine()
 	{
-		$args = $_SERVER['argv'] ?? [];
-		array_shift($args); // scrap invoking program
-		$optionValue = false;
-
-		foreach ($args as $i => $arg)
+		// start picking segments off from #1, ignoring the invoking program
+		for ($i = 1; $i < $_SERVER['argc']; $i ++)
 		{
-			// If there's no "-" at the beginning, then
-			// this is probably an argument or an option value
-			if (mb_strpos($arg, '-') !== 0)
+			// If there's no '-' at the beginning of the argument
+			// then add it to our segments.
+			if (mb_strpos($_SERVER['argv'][$i], '-') !== 0)
 			{
-				if ($optionValue)
-				{
-					// We have already included this in the previous
-					// iteration, so reset this flag
-					$optionValue = false;
-				}
-				else
-				{
-					// Yup, it's a segment
-					static::$segments[] = $arg;
-				}
-
+				static::$segments[] = $_SERVER['argv'][$i];
 				continue;
 			}
 
-			$arg   = ltrim($arg, '-');
+			$arg   = str_replace('-', '', $_SERVER['argv'][$i]);
 			$value = null;
 
-			if (isset($args[$i + 1]) && mb_strpos($args[$i + 1], '-') !== 0)
+			// if there is a following segment, and it doesn't start with a dash, it's a value.
+			if (isset($_SERVER['argv'][$i + 1]) && mb_strpos($_SERVER['argv'][$i + 1], '-') !== 0)
 			{
-				$value       = $args[$i + 1];
-				$optionValue = true;
+				$value = $_SERVER['argv'][$i + 1];
+				$i ++;
 			}
 
 			static::$options[$arg] = $value;
@@ -931,8 +937,6 @@ class CLI
 	 *
 	 *  // segment(3) is 'three', not '-f' or 'anOption'
 	 *  > php spark one two -f anOption three
-	 *
-	 * **IMPORTANT:** The index here is one-based instead of zero-based.
 	 *
 	 * @param integer $index
 	 *
@@ -1002,12 +1006,9 @@ class CLI
 	 * Returns the options as a string, suitable for passing along on
 	 * the CLI to other commands.
 	 *
-	 * @param boolean $useLongOpts Use '--' for long options?
-	 * @param boolean $trim        Trim final string output?
-	 *
 	 * @return string
 	 */
-	public static function getOptionString(bool $useLongOpts = false, bool $trim = false): string
+	public static function getOptionString(): string
 	{
 		if (empty(static::$options))
 		{
@@ -1018,28 +1019,17 @@ class CLI
 
 		foreach (static::$options as $name => $value)
 		{
-			if ($useLongOpts && mb_strlen($name) > 1)
-			{
-				$out .= "--{$name} ";
-			}
-			else
-			{
-				$out .= "-{$name} ";
-			}
-
 			// If there's a space, we need to group
 			// so it will pass correctly.
 			if (mb_strpos($value, ' ') !== false)
 			{
-				$out .= '"' . $value . '" ';
+				$value = '"' . $value . '"';
 			}
-			elseif ($value !== null)
-			{
-				$out .= "{$value} ";
-			}
+
+			$out .= "-{$name} $value ";
 		}
 
-		return $trim ? trim($out) : $out;
+		return $out;
 	}
 
 	//--------------------------------------------------------------------
@@ -1055,45 +1045,45 @@ class CLI
 	public static function table(array $tbody, array $thead = [])
 	{
 		// All the rows in the table will be here until the end
-		$tableRows = [];
+		$table_rows = [];
 
 		// We need only indexes and not keys
 		if (! empty($thead))
 		{
-			$tableRows[] = array_values($thead);
+			$table_rows[] = array_values($thead);
 		}
 
 		foreach ($tbody as $tr)
 		{
-			$tableRows[] = array_values($tr);
+			$table_rows[] = array_values($tr);
 		}
 
 		// Yes, it really is necessary to know this count
-		$totalRows = count($tableRows);
+		$total_rows = count($table_rows);
 
 		// Store all columns lengths
 		// $all_cols_lengths[row][column] = length
-		$allColsLengths = [];
+		$all_cols_lengths = [];
 
 		// Store maximum lengths by column
 		// $max_cols_lengths[column] = length
-		$maxColsLengths = [];
+		$max_cols_lengths = [];
 
 		// Read row by row and define the longest columns
-		for ($row = 0; $row < $totalRows; $row ++)
+		for ($row = 0; $row < $total_rows; $row ++)
 		{
 			$column = 0; // Current column index
-			foreach ($tableRows[$row] as $col)
+			foreach ($table_rows[$row] as $col)
 			{
 				// Sets the size of this column in the current row
-				$allColsLengths[$row][$column] = static::strlen($col);
+				$all_cols_lengths[$row][$column] = static::strlen($col);
 
 				// If the current column does not have a value among the larger ones
 				// or the value of this is greater than the existing one
 				// then, now, this assumes the maximum length
-				if (! isset($maxColsLengths[$column]) || $allColsLengths[$row][$column] > $maxColsLengths[$column])
+				if (! isset($max_cols_lengths[$column]) || $all_cols_lengths[$row][$column] > $max_cols_lengths[$column])
 				{
-					$maxColsLengths[$column] = $allColsLengths[$row][$column];
+					$max_cols_lengths[$column] = $all_cols_lengths[$row][$column];
 				}
 
 				// We can go check the size of the next column...
@@ -1103,15 +1093,15 @@ class CLI
 
 		// Read row by row and add spaces at the end of the columns
 		// to match the exact column length
-		for ($row = 0; $row < $totalRows; $row ++)
+		for ($row = 0; $row < $total_rows; $row ++)
 		{
 			$column = 0;
-			foreach ($tableRows[$row] as $col)
+			foreach ($table_rows[$row] as $col)
 			{
-				$diff = $maxColsLengths[$column] - static::strlen($col);
+				$diff = $max_cols_lengths[$column] - static::strlen($col);
 				if ($diff)
 				{
-					$tableRows[$row][$column] = $tableRows[$row][$column] . str_repeat(' ', $diff);
+					$table_rows[$row][$column] = $table_rows[$row][$column] . str_repeat(' ', $diff);
 				}
 				$column ++;
 			}
@@ -1120,13 +1110,13 @@ class CLI
 		$table = '';
 
 		// Joins columns and append the well formatted rows to the table
-		for ($row = 0; $row < $totalRows; $row ++)
+		for ($row = 0; $row < $total_rows; $row ++)
 		{
 			// Set the table border-top
 			if ($row === 0)
 			{
 				$cols = '+';
-				foreach ($tableRows[$row] as $col)
+				foreach ($table_rows[$row] as $col)
 				{
 					$cols .= str_repeat('-', static::strlen($col) + 2) . '+';
 				}
@@ -1134,10 +1124,10 @@ class CLI
 			}
 
 			// Set the columns borders
-			$table .= '| ' . implode(' | ', $tableRows[$row]) . ' |' . PHP_EOL;
+			$table .= '| ' . implode(' | ', $table_rows[$row]) . ' |' . PHP_EOL;
 
 			// Set the thead and table borders-bottom
-			if (isset($cols) && ($row === 0 && ! empty($thead) || $row + 1 === $totalRows))
+			if ($row === 0 && ! empty($thead) || $row + 1 === $total_rows)
 			{
 				$table .= $cols . PHP_EOL;
 			}
@@ -1158,20 +1148,18 @@ class CLI
 	 *
 	 * @param resource $handle
 	 * @param string   $string
-	 *
-	 * @return void
 	 */
 	protected static function fwrite($handle, string $string)
 	{
-		if (! is_cli())
+		if (is_cli())
 		{
-			// @codeCoverageIgnoreStart
-			echo $string;
+			fwrite($handle, $string);
 			return;
-			// @codeCoverageIgnoreEnd
 		}
 
-		fwrite($handle, $string);
+		// @codeCoverageIgnoreStart
+		echo $string;
+		// @codeCoverageIgnoreEnd
 	}
 }
 

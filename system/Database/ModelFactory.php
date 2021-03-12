@@ -1,29 +1,22 @@
-<?php
+<?php namespace CodeIgniter\Database;
 
-/**
- * This file is part of the CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
+use Config\Services;
 
-namespace CodeIgniter\Database;
-
-use CodeIgniter\Config\Factories;
-
-/**
- * Returns new or shared Model instances
- *
- * @deprecated Use CodeIgniter\Config\Factories::models()
- */
 class ModelFactory
 {
 	/**
-	 * Creates new Model instances or returns a shared instance
+	 * Cache for instance of any models that
+	 * have been requested as "shared" instance.
 	 *
-	 * @param string              $name       Model name, namespace optional
+	 * @var array
+	 */
+	static private $instances = [];
+
+	/**
+	 * Create new configuration instances or return
+	 * a shared instance
+	 *
+	 * @param string              $name       Configuration name
 	 * @param boolean             $getShared  Use shared instance
 	 * @param ConnectionInterface $connection
 	 *
@@ -31,25 +24,88 @@ class ModelFactory
 	 */
 	public static function get(string $name, bool $getShared = true, ConnectionInterface $connection = null)
 	{
-		return Factories::models($name, ['getShared' => $getShared], $connection);
+		$class = $name;
+		if (($pos = strrpos($name, '\\')) !== false)
+		{
+			$class = substr($name, $pos + 1);
+		}
+
+		if (! $getShared)
+		{
+			return self::createClass($name, $connection);
+		}
+
+		if (! isset( self::$instances[$class] ))
+		{
+			self::$instances[$class] = self::createClass($name, $connection);
+		}
+		return self::$instances[$class];
 	}
 
 	/**
 	 * Helper method for injecting mock instances while testing.
 	 *
-	 * @param string $name
-	 * @param object $instance
+	 * @param string   $class
+	 * @param $instance
 	 */
-	public static function injectMock(string $name, $instance)
+	public static function injectMock(string $class, $instance)
 	{
-		Factories::injectMock('models', $name, $instance);
+		self::$instances[$class] = $instance;
 	}
 
 	/**
-	 * Resets the static arrays
+	 * Resets the instances array
 	 */
 	public static function reset()
 	{
-		Factories::reset('models');
+		static::$instances = [];
+	}
+
+	/**
+	 * Find configuration class and create instance
+	 *
+	 * @param string                   $name       Classname
+	 * @param ConnectionInterface|null $connection
+	 *
+	 * @return mixed|null
+	 */
+	private static function createClass(string $name, ConnectionInterface &$connection = null)
+	{
+		if (class_exists($name))
+		{
+			return new $name();
+		}
+
+		$locator = Services::locator();
+		$file    = $locator->locateFile($name, 'Models');
+
+		if (empty($file))
+		{
+			// No file found - check if the class was namespaced
+			if (strpos($name, '\\') !== false)
+			{
+				// Class was namespaced and locateFile couldn't find it
+				return null;
+			}
+
+			// Check all namespaces
+			$files = $locator->search('Models/' . $name);
+			if (empty($files))
+			{
+				return null;
+			}
+
+			// Get the first match (prioritizes user and framework)
+			$file = reset($files);
+		}
+
+		$name = $locator->getClassname($file);
+
+		if (empty($name))
+		{
+			return null;
+		}
+
+		return new $name($connection);
 	}
 }

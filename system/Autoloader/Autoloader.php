@@ -1,19 +1,43 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Autoloader;
-
-use Config\Autoload;
-use Config\Modules;
-use InvalidArgumentException;
 
 /**
  * CodeIgniter Autoloader
@@ -50,6 +74,8 @@ use InvalidArgumentException;
  *
  *      // register the autoloader
  *      $loader->register();
+ *
+ * @package CodeIgniter\Autoloader
  */
 class Autoloader
 {
@@ -73,18 +99,18 @@ class Autoloader
 	 * Reads in the configuration array (described above) and stores
 	 * the valid parts that we'll need.
 	 *
-	 * @param Autoload $config
-	 * @param Modules  $modules
+	 * @param \Config\Autoload $config
+	 * @param \Config\Modules  $moduleConfig
 	 *
 	 * @return $this
 	 */
-	public function initialize(Autoload $config, Modules $modules)
+	public function initialize(\Config\Autoload $config, \Config\Modules $moduleConfig)
 	{
 		// We have to have one or the other, though we don't enforce the need
 		// to have both present in order to work.
 		if (empty($config->psr4) && empty($config->classmap))
 		{
-			throw new InvalidArgumentException('Config array must contain either the \'psr4\' key or the \'classmap\' key.');
+			throw new \InvalidArgumentException('Config array must contain either the \'psr4\' key or the \'classmap\' key.');
 		}
 
 		if (isset($config->psr4))
@@ -98,7 +124,7 @@ class Autoloader
 		}
 
 		// Should we load through Composer's namespaces, also?
-		if ($modules->discoverInComposer)
+		if ($moduleConfig->discoverInComposer)
 		{
 			$this->discoverComposerNamespaces();
 		}
@@ -113,19 +139,26 @@ class Autoloader
 	 */
 	public function register()
 	{
+		// Since the default file extensions are searched
+		// in order of .inc then .php, but we always use .php,
+		// put the .php extension first to eek out a bit
+		// better performance.
+		// http://php.net/manual/en/function.spl-autoload.php#78053
+		spl_autoload_extensions('.php,.inc');
+
 		// Prepend the PSR4  autoloader for maximum performance.
-		spl_autoload_register([$this, 'loadClass'], true, true); // @phpstan-ignore-line
+		spl_autoload_register([$this, 'loadClass'], true, true);
 
 		// Now prepend another loader for the files in our class map.
+		$config = is_array($this->classmap) ? $this->classmap : [];
 
-		// @phpstan-ignore-next-line
-		spl_autoload_register(function ($class) {
-			if (empty($this->classmap[$class]))
+		spl_autoload_register(function ($class) use ($config) {
+			if (empty($config[$class]))
 			{
 				return false;
 			}
 
-			include_once $this->classmap[$class];
+			include_once $config[$class];
 		}, true, // Throw exception
 			true // Prepend
 		);
@@ -139,7 +172,7 @@ class Autoloader
 	 * @param array|string $namespace
 	 * @param string       $path
 	 *
-	 * @return $this
+	 * @return Autoloader
 	 */
 	public function addNamespace($namespace, string $path = null)
 	{
@@ -153,18 +186,18 @@ class Autoloader
 				{
 					foreach ($path as $dir)
 					{
-						$this->prefixes[$prefix][] = rtrim($dir, '\\/') . DIRECTORY_SEPARATOR;
+						$this->prefixes[$prefix][] = rtrim($dir, '/') . '/';
 					}
 
 					continue;
 				}
 
-				$this->prefixes[$prefix][] = rtrim($path, '\\/') . DIRECTORY_SEPARATOR;
+				$this->prefixes[$prefix][] = rtrim($path, '/') . '/';
 			}
 		}
 		else
 		{
-			$this->prefixes[trim($namespace, '\\')][] = rtrim($path, '\\/') . DIRECTORY_SEPARATOR;
+			$this->prefixes[trim($namespace, '\\')][] = rtrim($path, '/') . '/';
 		}
 
 		return $this;
@@ -177,7 +210,7 @@ class Autoloader
 	 *
 	 * If a prefix param is set, returns only paths to the given prefix.
 	 *
-	 * @param string|null $prefix
+	 * @var string|null $prefix
 	 *
 	 * @return array
 	 */
@@ -198,14 +231,11 @@ class Autoloader
 	 *
 	 * @param string $namespace
 	 *
-	 * @return $this
+	 * @return Autoloader
 	 */
 	public function removeNamespace(string $namespace)
 	{
-		if (isset($this->prefixes[trim($namespace, '\\')]))
-		{
-			unset($this->prefixes[trim($namespace, '\\')]);
-		}
+		unset($this->prefixes[trim($namespace, '\\')]);
 
 		return $this;
 	}
@@ -225,7 +255,16 @@ class Autoloader
 		$class = trim($class, '\\');
 		$class = str_ireplace('.php', '', $class);
 
-		return $this->loadInNamespace($class);
+		$mapped_file = $this->loadInNamespace($class);
+
+		// Nothing? One last chance by looking
+		// in common CodeIgniter folders.
+		if (! $mapped_file)
+		{
+			$mapped_file = $this->loadLegacy($class);
+		}
+
+		return $mapped_file;
 	}
 
 	//--------------------------------------------------------------------
@@ -241,15 +280,6 @@ class Autoloader
 	{
 		if (strpos($class, '\\') === false)
 		{
-			$class    = 'Config\\' . $class;
-			$filePath = APPPATH . str_replace('\\', DIRECTORY_SEPARATOR, $class) . '.php';
-			$filename = $this->includeFile($filePath);
-
-			if ($filename)
-			{
-				return $filename;
-			}
-
 			return false;
 		}
 
@@ -257,12 +287,13 @@ class Autoloader
 		{
 			foreach ($directories as $directory)
 			{
-				$directory = rtrim($directory, '\\/');
+				$directory = rtrim($directory, '/');
 
 				if (strpos($class, $namespace) === 0)
 				{
-					$filePath = $directory . str_replace('\\', DIRECTORY_SEPARATOR, substr($class, strlen($namespace))) . '.php';
-					$filename = $this->includeFile($filePath);
+					$filePath = $directory . str_replace('\\', '/',
+							substr($class, strlen($namespace))) . '.php';
+					$filename = $this->requireFile($filePath);
 
 					if ($filename)
 					{
@@ -279,19 +310,59 @@ class Autoloader
 	//--------------------------------------------------------------------
 
 	/**
-	 * A central way to include a file. Split out primarily for testing purposes.
+	 * Attempts to load the class from common locations in previous
+	 * version of CodeIgniter, namely 'app/Libraries', and
+	 * 'app/Models'.
+	 *
+	 * @param string $class The class name. This typically should NOT have a namespace.
+	 *
+	 * @return mixed    The mapped file name on success, or boolean false on failure
+	 */
+	protected function loadLegacy(string $class)
+	{
+		// If there is a namespace on this class, then
+		// we cannot load it from traditional locations.
+		if (strpos($class, '\\') !== false)
+		{
+			return false;
+		}
+
+		$paths = [
+			APPPATH . 'Controllers/',
+			APPPATH . 'Libraries/',
+			APPPATH . 'Models/',
+		];
+
+		$class = str_replace('\\', '/', $class) . '.php';
+
+		foreach ($paths as $path)
+		{
+			if ($file = $this->requireFile($path . $class))
+			{
+				return $file;
+			}
+		}
+
+		return false;
+	}
+
+	//--------------------------------------------------------------------
+
+	/**
+	 * A central way to require a file is loaded. Split out primarily
+	 * for testing purposes.
 	 *
 	 * @param string $file
 	 *
 	 * @return string|false The filename on success, false if the file is not loaded
 	 */
-	protected function includeFile(string $file)
+	protected function requireFile(string $file)
 	{
 		$file = $this->sanitizeFilename($file);
 
 		if (is_file($file))
 		{
-			include_once $file;
+			require_once $file;
 
 			return $file;
 		}

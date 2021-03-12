@@ -1,27 +1,56 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\HTTP\Exceptions;
 
+use CodeIgniter\Exceptions\ExceptionInterface;
 use CodeIgniter\Exceptions\FrameworkException;
 
 /**
  * Things that can go wrong with HTTP
  */
-class HTTPException extends FrameworkException
+class HTTPException extends FrameworkException implements ExceptionInterface
 {
+
 	/**
 	 * For CurlRequest
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 *
 	 * @codeCoverageIgnore
 	 */
@@ -35,7 +64,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $cert
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forSSLCertNotFound(string $cert)
 	{
@@ -47,7 +76,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $key
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidSSLKey(string $key)
 	{
@@ -75,7 +104,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $type
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidNegotiationType(string $type)
 	{
@@ -87,7 +116,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $protocols
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidHTTPProtocol(string $protocols)
 	{
@@ -97,7 +126,7 @@ class HTTPException extends FrameworkException
 	/**
 	 * For Negotiate
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forEmptySupportedNegotiations()
 	{
@@ -109,7 +138,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $route
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidRedirectRoute(string $route)
 	{
@@ -119,7 +148,7 @@ class HTTPException extends FrameworkException
 	/**
 	 * For Response
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forMissingResponseStatus()
 	{
@@ -131,7 +160,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param integer $code
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidStatusCode(int $code)
 	{
@@ -143,7 +172,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param integer $code
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forUnkownStatusCode(int $code)
 	{
@@ -155,7 +184,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string $uri
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forUnableToParseURI(string $uri)
 	{
@@ -167,7 +196,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param integer $segment
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forURISegmentOutOfRange(int $segment)
 	{
@@ -179,7 +208,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param integer $port
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidPort(int $port)
 	{
@@ -189,7 +218,7 @@ class HTTPException extends FrameworkException
 	/**
 	 * For URI
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forMalformedQueryString()
 	{
@@ -199,7 +228,7 @@ class HTTPException extends FrameworkException
 	/**
 	 * For Uploaded file move
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forAlreadyMoved()
 	{
@@ -211,7 +240,7 @@ class HTTPException extends FrameworkException
 	 *
 	 * @param string|null $path
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forInvalidFile(string $path = null)
 	{
@@ -225,22 +254,11 @@ class HTTPException extends FrameworkException
 	 * @param string $target
 	 * @param string $error
 	 *
-	 * @return HTTPException
+	 * @return \CodeIgniter\HTTP\Exceptions\HTTPException
 	 */
 	public static function forMoveFailed(string $source, string $target, string $error)
 	{
 		return new static(lang('HTTP.moveFailed', [$source, $target, $error]));
 	}
 
-	/**
-	 * For Invalid SameSite attribute setting
-	 *
-	 * @param string $samesite
-	 *
-	 * @return HTTPException
-	 */
-	public static function forInvalidSameSiteSetting(string $samesite)
-	{
-		return new static(lang('Security.invalidSameSiteSetting', [$samesite]));
-	}
 }

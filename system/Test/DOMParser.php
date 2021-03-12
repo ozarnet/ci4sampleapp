@@ -1,21 +1,43 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Test;
-
-use BadMethodCallException;
-use DOMDocument;
-use DOMNodeList;
-use DOMXPath;
-use InvalidArgumentException;
 
 /**
  * Load a response into a DOMDocument for testing assertions based on that
@@ -25,14 +47,14 @@ class DOMParser
 	/**
 	 * DOM for the body,
 	 *
-	 * @var DOMDocument
+	 * @var \DOMDocument
 	 */
 	protected $dom;
 
 	/**
 	 * Constructor.
 	 *
-	 * @throws BadMethodCallException
+	 * @throws \BadMethodCallException
 	 */
 	public function __construct()
 	{
@@ -40,11 +62,11 @@ class DOMParser
 		{
 			// always there in travis-ci
 			// @codeCoverageIgnoreStart
-			throw new BadMethodCallException('DOM extension is required, but not currently loaded.');
+			throw new \BadMethodCallException('DOM extension is required, but not currently loaded.');
 			// @codeCoverageIgnoreEnd
 		}
 
-		$this->dom = new DOMDocument('1.0', 'utf-8');
+		$this->dom = new \DOMDocument('1.0', 'utf-8');
 	}
 
 	/**
@@ -77,7 +99,7 @@ class DOMParser
 			// unclear how we would get here, given that we are trapping libxml errors
 			// @codeCoverageIgnoreStart
 			libxml_clear_errors();
-			throw new BadMethodCallException('Invalid HTML');
+			throw new \BadMethodCallException('Invalid HTML');
 			// @codeCoverageIgnoreEnd
 		}
 
@@ -93,13 +115,13 @@ class DOMParser
 	 *
 	 * @param string $path
 	 *
-	 * @return DOMParser
+	 * @return \CodeIgniter\Test\DOMParser
 	 */
 	public function withFile(string $path)
 	{
 		if (! is_file($path))
 		{
-			throw new InvalidArgumentException(basename($path) . ' is not a valid file.');
+			throw new \InvalidArgumentException(basename($path) . ' is not a valid file.');
 		}
 
 		$content = file_get_contents($path);
@@ -126,7 +148,7 @@ class DOMParser
 
 		$result = $this->doXPath($search, $element);
 
-		return (bool) $result->length;
+		return (bool)$result->length;
 	}
 
 	/**
@@ -193,7 +215,7 @@ class DOMParser
 	{
 		$result = $this->doXPath(null, 'input', ["[@value=\"{$value}\"][@name=\"{$field}\"]"]);
 
-		return (bool) $result->length;
+		return (bool)$result->length;
 	}
 
 	/**
@@ -210,21 +232,20 @@ class DOMParser
 			'[@checked="checked"]',
 		]);
 
-		return (bool) $result->length;
+		return (bool)$result->length;
 	}
 
 	//--------------------------------------------------------------------
-
 	/**
 	 * Search the DOM using an XPath expression.
 	 *
-	 * @param  string|null $search
-	 * @param  string      $element
-	 * @param  array       $paths
-	 *
-	 * @return DOMNodeList
+	 * @param  string $search
+	 * @param  string $element
+	 * @param  array  $paths
+	 * @return type
 	 */
-	protected function doXPath(?string $search, string $element, array $paths = [])
+
+	protected function doXPath(string $search = null, string $element, array $paths = [])
 	{
 		// Otherwise, grab any elements that match
 		// the selector
@@ -237,19 +258,19 @@ class DOMParser
 		{
 			$path = empty($selector['tag'])
 				? "id(\"{$selector['id']}\")"
-				: "//{$selector['tag']}[@id=\"{$selector['id']}\"]";
+				: "//body//{$selector['tag']}[@id=\"{$selector['id']}\"]";
 		}
 		// By Class
-		elseif (! empty($selector['class']))
+		else if (! empty($selector['class']))
 		{
 			$path = empty($selector['tag'])
 				? "//*[@class=\"{$selector['class']}\"]"
-				: "//{$selector['tag']}[@class=\"{$selector['class']}\"]";
+				: "//body//{$selector['tag']}[@class=\"{$selector['class']}\"]";
 		}
 		// By tag only
-		elseif (! empty($selector['tag']))
+		else if (! empty($selector['tag']))
 		{
-			$path = "//{$selector['tag']}";
+			$path = "//body//{$selector['tag']}";
 		}
 
 		if (! empty($selector['attr']))
@@ -275,7 +296,7 @@ class DOMParser
 			$path .= "[contains(., \"{$search}\")]";
 		}
 
-		$xpath = new DOMXPath($this->dom);
+		$xpath = new \DOMXPath($this->dom);
 
 		return $xpath->query($path);
 	}
@@ -284,7 +305,7 @@ class DOMParser
 	 * Look for the a selector  in the passed text.
 	 *
 	 * @param  string $selector
-	 * @return array
+	 * @return type
 	 */
 	public function parseSelector(string $selector)
 	{
@@ -334,4 +355,5 @@ class DOMParser
 			'attr'  => $attr,
 		];
 	}
+
 }

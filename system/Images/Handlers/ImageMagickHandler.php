@@ -1,20 +1,45 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT    MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Images\Handlers;
 
 use CodeIgniter\Images\Exceptions\ImageException;
-use Config\Images;
-use Exception;
-use Imagick;
 
 /**
  * Class ImageMagickHandler
@@ -26,13 +51,16 @@ use Imagick;
  * hmm - the width & height accessors at the end use the imagick extension.
  *
  * FIXME - This needs conversion & unit testing, to use the imagick extension
+ *
+ * @package CodeIgniter\Images\Handlers
  */
 class ImageMagickHandler extends BaseHandler
 {
+
 	/**
 	 * Stores image resource in memory.
 	 *
-	 * @var string|null
+	 * @var string
 	 */
 	protected $resource;
 
@@ -41,7 +69,7 @@ class ImageMagickHandler extends BaseHandler
 	/**
 	 * Constructor.
 	 *
-	 * @param  Images $config
+	 * @param  \Config\Images $config
 	 * @throws ImageException
 	 */
 	public function __construct($config = null)
@@ -65,7 +93,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param boolean $maintainRatio
 	 *
 	 * @return ImageMagickHandler
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function _resize(bool $maintainRatio = false)
 	{
@@ -93,7 +121,7 @@ class ImageMagickHandler extends BaseHandler
 	 * Crops the image.
 	 *
 	 * @return boolean|\CodeIgniter\Images\Handlers\ImageMagickHandler
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function _crop()
 	{
@@ -122,7 +150,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param integer $angle
 	 *
 	 * @return $this
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function _rotate(int $angle)
 	{
@@ -148,7 +176,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param integer $blue
 	 *
 	 * @return $this
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function _flatten(int $red = 255, int $green = 255, int $blue = 255)
 	{
@@ -172,7 +200,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param string $direction
 	 *
 	 * @return $this
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function _flip(string $direction)
 	{
@@ -214,7 +242,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param integer $quality
 	 *
 	 * @return array  Lines of output from shell command
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function process(string $action, int $quality = 100): array
 	{
@@ -234,7 +262,7 @@ class ImageMagickHandler extends BaseHandler
 			$this->config->libraryPath = rtrim($this->config->libraryPath, '/') . '/convert';
 		}
 
-		$cmd = $this->config->libraryPath;
+		$cmd  = $this->config->libraryPath;
 		$cmd .= $action === '-version' ? ' ' . $action : ' -quality ' . $quality . ' ' . $action;
 
 		$retval = 1;
@@ -250,7 +278,7 @@ class ImageMagickHandler extends BaseHandler
 			throw ImageException::forImageProcessFailed();
 		}
 
-		return $output; // @phpstan-ignore-line
+		return $output;
 	}
 
 	//--------------------------------------------------------------------
@@ -316,8 +344,8 @@ class ImageMagickHandler extends BaseHandler
 	 * To ensure we can use all features, like transparency,
 	 * during the process, we'll use a PNG as the temp file type.
 	 *
-	 * @return string
-	 * @throws Exception
+	 * @return resource|boolean
+	 * @throws \Exception
 	 */
 	protected function getResourcePath()
 	{
@@ -341,7 +369,7 @@ class ImageMagickHandler extends BaseHandler
 	/**
 	 * Make the image resource object if needed
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function ensureResource()
 	{
@@ -360,7 +388,7 @@ class ImageMagickHandler extends BaseHandler
 		switch ($this->image()->imageType)
 		{
 			case IMAGETYPE_WEBP:
-				if (! in_array('WEBP', Imagick::queryFormats(), true))
+				if (! in_array('WEBP', \Imagick::queryFormats()))
 				{
 					throw ImageException::forInvalidImageCreate(lang('images.webpNotSupported'));
 				}
@@ -376,7 +404,7 @@ class ImageMagickHandler extends BaseHandler
 	 * @param string $text
 	 * @param array  $options
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	protected function _text(string $text, array $options = [])
 	{
@@ -440,10 +468,10 @@ class ImageMagickHandler extends BaseHandler
 					break;
 			}
 
-			$xAxis = $xAxis >= 0 ? '+' . $xAxis : $xAxis; // @phpstan-ignore-line
-			$yAxis = $yAxis >= 0 ? '+' . $yAxis : $yAxis; // @phpstan-ignore-line
+			$xAxis = $xAxis >= 0 ? '+' . $xAxis : $xAxis;
+			$yAxis = $yAxis >= 0 ? '+' . $yAxis : $yAxis;
 
-			$cmd .= " -gravity {$gravity} -geometry {$xAxis}{$yAxis}"; // @phpstan-ignore-line
+			$cmd .= " -gravity {$gravity} -geometry {$xAxis}{$yAxis}";
 		}
 
 		// Color

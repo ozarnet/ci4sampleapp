@@ -1,12 +1,40 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\HTTP;
@@ -20,14 +48,16 @@ use CodeIgniter\HTTP\Exceptions\HTTPException;
  * type match between what the application supports and what the requesting
  * getServer wants.
  *
- * @see http://tools.ietf.org/html/rfc7231#section-5.3
+ * @see     http://tools.ietf.org/html/rfc7231#section-5.3
+ * @package CodeIgniter\HTTP
  */
 class Negotiate
 {
+
 	/**
 	 * Request
 	 *
-	 * @var RequestInterface|IncomingRequest
+	 * @var \CodeIgniter\HTTP\RequestInterface|\CodeIgniter\HTTP\IncomingRequest
 	 */
 	protected $request;
 
@@ -36,7 +66,7 @@ class Negotiate
 	/**
 	 * Constructor
 	 *
-	 * @param RequestInterface|null $request
+	 * @param \CodeIgniter\HTTP\RequestInterface|null $request
 	 */
 	public function __construct(RequestInterface $request = null)
 	{
@@ -241,14 +271,11 @@ class Negotiate
 
 			foreach ($pairs as $pair)
 			{
-				if (preg_match(
-					'/^(?P<name>.+?)=(?P<quoted>"|\')?(?P<value>.*?)(?:\k<quoted>)?$/',
-					$pair,
-					$param
-				))
-				{
-					$parameters[trim($param['name'])] = trim($param['value']);
-				}
+				$param = [];
+				preg_match(
+						'/^(?P<name>.+?)=(?P<quoted>"|\')?(?P<value>.*?)(?:\k<quoted>)?$/', $pair, $param
+				);
+				$parameters[trim($param['name'])] = trim($param['value']);
 			}
 
 			$quality = 1.0;
@@ -270,8 +297,8 @@ class Negotiate
 		usort($results, function ($a, $b) {
 			if ($a['q'] === $b['q'])
 			{
-				$aAst = substr_count($a['value'], '*');
-				$bAst = substr_count($b['value'], '*');
+				$a_ast = substr_count($a['value'], '*');
+				$b_ast = substr_count($b['value'], '*');
 
 				// '*/*' has lower precedence than 'text/*',
 				// and 'text/*' has lower priority than 'text/plain'
@@ -279,7 +306,7 @@ class Negotiate
 				// This seems backwards, but needs to be that way
 				// due to the way PHP7 handles ordering or array
 				// elements created by reference.
-				if ($aAst > $bAst)
+				if ($a_ast > $b_ast)
 				{
 					return 1;
 				}
@@ -290,7 +317,7 @@ class Negotiate
 				// This seems backwards, but needs to be that way
 				// due to the way PHP7 handles ordering or array
 				// elements created by reference.
-				if ($aAst === $bAst)
+				if ($a_ast === $b_ast)
 				{
 					return count($b['params']) - count($a['params']);
 				}
@@ -367,9 +394,8 @@ class Negotiate
 
 		foreach ($supported['params'] as $label => $value)
 		{
-			if (! isset($acceptable['params'][$label])
-				|| $acceptable['params'][$label] !== $value
-			)
+			if (! isset($acceptable['params'][$label]) ||
+					$acceptable['params'][$label] !== $value)
 			{
 				return false;
 			}

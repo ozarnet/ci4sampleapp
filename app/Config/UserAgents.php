@@ -1,28 +1,18 @@
-<?php
-
-namespace Config;
+<?php namespace Config;
 
 use CodeIgniter\Config\BaseConfig;
 
-/**
- * -------------------------------------------------------------------
- * User Agents
- * -------------------------------------------------------------------
- *
- * This file contains four arrays of user agent data. It is used by the
- * User Agent Class to help identify browser, platform, robot, and
- * mobile device data. The array keys are used to identify the device
- * and the array values are used to set the actual name of the item.
- */
 class UserAgents extends BaseConfig
 {
-	/**
-	 * -------------------------------------------------------------------
-	 * OS Platforms
-	 * -------------------------------------------------------------------
-	 *
-	 * @var array<string, string>
-	 */
+	/*
+	| -------------------------------------------------------------------
+	| USER AGENT TYPES
+	| -------------------------------------------------------------------
+	| This file contains four arrays of user agent data. It is used by the
+	| User Agent Class to help identify browser, platform, robot, and
+	| mobile device data. The array keys are used to identify the device
+	| and the array values are used to set the actual name of the item.
+	*/
 	public $platforms = [
 		'windows nt 10.0' => 'Windows 10',
 		'windows nt 6.3'  => 'Windows 8.1',
@@ -68,21 +58,12 @@ class UserAgents extends BaseConfig
 		'symbian'         => 'Symbian OS',
 	];
 
-	/**
-	 * -------------------------------------------------------------------
-	 * Browsers
-	 * -------------------------------------------------------------------
-	 *
-	 * The order of this array should NOT be changed. Many browsers return
-	 * multiple browser types so we want to identify the subtype first.
-	 *
-	 * @var array<string, string>
-	 */
+	// The order of this array should NOT be changed. Many browsers return
+	// multiple browser types so we want to identify the sub-type first.
 	public $browsers = [
 		'OPR'               => 'Opera',
 		'Flock'             => 'Flock',
 		'Edge'              => 'Spartan',
-		'Edg'               => 'Edge',
 		'Chrome'            => 'Chrome',
 		// Opera 10+ always reports Opera/9.80 and appends Version/<real version> to the user agent string
 		'Opera.*?Version'   => 'Opera',
@@ -112,13 +93,6 @@ class UserAgents extends BaseConfig
 		'Vivaldi'           => 'Vivaldi',
 	];
 
-	/**
-	 * -------------------------------------------------------------------
-	 * Mobiles
-	 * -------------------------------------------------------------------
-	 *
-	 * @var array<string, string>
-	 */
 	public $mobiles = [
 		// legacy array, old values commented out
 		'mobileexplorer'       => 'Mobile Explorer',
@@ -219,15 +193,7 @@ class UserAgents extends BaseConfig
 		'cellphone'            => 'Generic Mobile',
 	];
 
-	/**
-	 * -------------------------------------------------------------------
-	 * Robots
-	 * -------------------------------------------------------------------
-	 *
-	 * There are hundred of bots but these are the most common.
-	 *
-	 * @var array<string, string>
-	 */
+	// There are hundreds of bots but these are the most common.
 	public $robots = [
 		'googlebot'            => 'Googlebot',
 		'msnbot'               => 'MSNBot',

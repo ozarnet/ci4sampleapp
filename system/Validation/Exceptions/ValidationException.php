@@ -1,19 +1,9 @@
-<?php
+<?php namespace CodeIgniter\Validation\Exceptions;
 
-/**
- * This file is part of the CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-namespace CodeIgniter\Validation\Exceptions;
-
+use CodeIgniter\Exceptions\ExceptionInterface;
 use CodeIgniter\Exceptions\FrameworkException;
 
-class ValidationException extends FrameworkException
+class ValidationException extends FrameworkException implements ExceptionInterface
 {
 	public static function forRuleNotFound(string $rule = null)
 	{

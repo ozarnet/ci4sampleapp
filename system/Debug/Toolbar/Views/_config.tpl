@@ -33,7 +33,7 @@
 			</td>
 		</tr>
 		<tr>
-			<td>Timezone:</td>
+			<td>TimeZone:</td>
 			<td>{ timezone }</td>
 		</tr>
 		<tr>

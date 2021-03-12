@@ -1,12 +1,40 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Database;
@@ -18,6 +46,7 @@ use CodeIgniter\Entity;
  */
 abstract class BaseResult implements ResultInterface
 {
+
 	/**
 	 * Connection ID
 	 *
@@ -28,7 +57,7 @@ abstract class BaseResult implements ResultInterface
 	/**
 	 * Result ID
 	 *
-	 * @var resource|object|boolean
+	 * @var resource|object
 	 */
 	public $resultID;
 
@@ -49,7 +78,7 @@ abstract class BaseResult implements ResultInterface
 	/**
 	 * Custom Result Object
 	 *
-	 * @var array
+	 * @var object[]
 	 */
 	public $customResultObject = [];
 
@@ -61,16 +90,16 @@ abstract class BaseResult implements ResultInterface
 	public $currentRow = 0;
 
 	/**
-	 * The number of records in the query result
+	 * Number of rows
 	 *
-	 * @var integer|null
+	 * @var integer
 	 */
-	protected $numRows = null;
+	public $numRows;
 
 	/**
 	 * Row data
 	 *
-	 * @var array|null
+	 * @var array
 	 */
 	public $rowData;
 
@@ -105,8 +134,7 @@ abstract class BaseResult implements ResultInterface
 		{
 			return $this->getResultArray();
 		}
-
-		if ($type === 'object')
+		elseif ($type === 'object')
 		{
 			return $this->getResultObject();
 		}
@@ -130,7 +158,7 @@ abstract class BaseResult implements ResultInterface
 			return $this->customResultObject[$className];
 		}
 
-		if (is_bool($this->resultID) || ! $this->resultID)
+		if (is_bool($this->resultID) || ! $this->resultID || $this->numRows === 0)
 		{
 			return [];
 		}
@@ -174,7 +202,6 @@ abstract class BaseResult implements ResultInterface
 			$this->customResultObject[$className][] = $row;
 		}
 
-		// @phpstan-ignore-next-line
 		return $this->customResultObject[$className];
 	}
 
@@ -197,7 +224,7 @@ abstract class BaseResult implements ResultInterface
 		// In the event that query caching is on, the result_id variable
 		// will not be a valid resource so we'll simply return an empty
 		// array.
-		if (is_bool($this->resultID) || ! $this->resultID)
+		if (is_bool($this->resultID) || ! $this->resultID || $this->numRows === 0)
 		{
 			return [];
 		}
@@ -240,7 +267,7 @@ abstract class BaseResult implements ResultInterface
 		// In the event that query caching is on, the result_id variable
 		// will not be a valid resource so we'll simply return an empty
 		// array.
-		if (is_bool($this->resultID) || ! $this->resultID)
+		if (is_bool($this->resultID) || ! $this->resultID || $this->numRows === 0)
 		{
 			return [];
 		}
@@ -266,7 +293,6 @@ abstract class BaseResult implements ResultInterface
 			$this->resultObject[] = $row;
 		}
 
-		// @phpstan-ignore-next-line
 		return $this->resultObject;
 	}
 
@@ -303,8 +329,7 @@ abstract class BaseResult implements ResultInterface
 		{
 			return $this->getRowObject($n);
 		}
-
-		if ($type === 'array')
+		elseif ($type === 'array')
 		{
 			return $this->getRowArray($n);
 		}
@@ -521,8 +546,7 @@ abstract class BaseResult implements ResultInterface
 		{
 			return $this->fetchAssoc();
 		}
-
-		if ($type === 'object')
+		elseif ($type === 'object')
 		{
 			return $this->fetchObject();
 		}
@@ -531,31 +555,6 @@ abstract class BaseResult implements ResultInterface
 	}
 
 	//--------------------------------------------------------------------
-
-	/**
-	 * Number of rows in the result set; checks for previous count, falls
-	 * back on counting resultArray or resultObject, finally fetching resultArray
-	 * if nothing was previously fetched
-	 *
-	 * @return integer
-	 */
-	public function getNumRows(): int
-	{
-		if (is_int($this->numRows))
-		{
-			return $this->numRows;
-		}
-		if ($this->resultArray !== [])
-		{
-			return $this->numRows = count($this->resultArray);
-		}
-		if ($this->resultObject !== [])
-		{
-			return $this->numRows = count($this->resultObject);
-		}
-
-		return $this->numRows = count($this->getResultArray());
-	}
 
 	/**
 	 * Gets the number of fields in the result set.

@@ -1,22 +1,47 @@
 <?php
-
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT    MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
-
-use CodeIgniter\Files\Exceptions\FileNotFoundException;
-use Config\DocTypes;
-use Config\Mimes;
 
 // --------------------------------------------------------------------
 
 /**
  * CodeIgniter HTML Helpers
+ *
+ * @package CodeIgniter
  */
 if (! function_exists('ul'))
 {
@@ -26,9 +51,8 @@ if (! function_exists('ul'))
 	 * Generates an HTML unordered list from an single or
 	 * multi-dimensional array.
 	 *
-	 * @param array $list
-	 * @param mixed $attributes HTML attributes string, array, object
-	 *
+	 * @param  array $list
+	 * @param  mixed $attributes HTML attributes string, array, object
 	 * @return string
 	 */
 	function ul(array $list, $attributes = ''): string
@@ -46,9 +70,8 @@ if (! function_exists('ol'))
 	 *
 	 * Generates an HTML ordered list from an single or multi-dimensional array.
 	 *
-	 * @param array $list
-	 * @param mixed $attributes HTML attributes string, array, object
-	 *
+	 * @param  array $list
+	 * @param  mixed $attributes HTML attributes string, array, object
 	 * @return string
 	 */
 	function ol(array $list, $attributes = ''): string
@@ -66,11 +89,10 @@ if (! function_exists('_list'))
 	 *
 	 * Generates an HTML ordered list from an single or multi-dimensional array.
 	 *
-	 * @param string  $type
-	 * @param mixed   $list
-	 * @param mixed   $attributes string, array, object
-	 * @param integer $depth
-	 *
+	 * @param  string  $type
+	 * @param  mixed   $list
+	 * @param  mixed   $attributes string, array, object
+	 * @param  integer $depth
 	 * @return string
 	 */
 	function _list(string $type = 'ul', $list = [], $attributes = '', int $depth = 0): string
@@ -119,10 +141,9 @@ if (! function_exists('img'))
 	 *
 	 * Generates an image element
 	 *
-	 * @param string|array        $src        Image source URI, or array of attributes and values
-	 * @param boolean             $indexPage  Whether to treat $src as a routed URI string
-	 * @param string|array|object $attributes Additional HTML attributes
-	 *
+	 * @param  mixed   $src
+	 * @param  boolean $indexPage
+	 * @param  mixed   $attributes
 	 * @return string
 	 */
 	function img($src = '', bool $indexPage = false, $attributes = ''): string
@@ -131,10 +152,7 @@ if (! function_exists('img'))
 		{
 			$src = ['src' => $src];
 		}
-		if (! isset($src['src']))
-		{
-			$src['src'] = $attributes['src'] ?? '';
-		}
+
 		if (! isset($src['alt']))
 		{
 			$src['alt'] = $attributes['alt'] ?? '';
@@ -142,68 +160,33 @@ if (! function_exists('img'))
 
 		$img = '<img';
 
-		// Check for a relative URI
-		if (! preg_match('#^([a-z]+:)?//#i', $src['src']) && strpos($src['src'], 'data:') !== 0)
+		foreach ($src as $k => $v)
 		{
-			if ($indexPage === true)
+			//Include a protocol if nothing is explicitely defined.
+			if ($k === 'src' && ! preg_match('#^([a-z]+:)?//#i', $v))
 			{
-				$img .= ' src="' . site_url($src['src']) . '"';
+				if ($indexPage === true)
+				{
+					$img .= ' src="' . site_url($v) . '"';
+				}
+				else
+				{
+					$img .= ' src="' . slash_item('baseURL') . $v . '"';
+				}
 			}
 			else
 			{
-				$img .= ' src="' . slash_item('baseURL') . $src['src'] . '"';
+				$img .= ' ' . $k . '="' . $v . '"';
 			}
-
-			unset($src['src']);
 		}
 
-		// Append any other values
-		foreach ($src as $key => $value)
+		// prevent passing "alt" to stringify_attributes
+		if (is_array($attributes) && isset($attributes['alt']))
 		{
-			$img .= ' ' . $key . '="' . $value . '"';
-		}
-
-		// Prevent passing completed values to stringify_attributes
-		if (is_array($attributes))
-		{
-			unset($attributes['alt'], $attributes['src']);
+			unset($attributes['alt']);
 		}
 
 		return $img . stringify_attributes($attributes) . ' />';
-	}
-}
-
-if (! function_exists('img_data'))
-{
-	/**
-	 * Image (data)
-	 *
-	 * Generates a src-ready string from an image using the "data:" protocol
-	 *
-	 * @param string      $path Image source path
-	 * @param string|null $mime MIME type to use, or null to guess
-	 *
-	 * @return string
-	 */
-	function img_data(string $path, string $mime = null): string
-	{
-		if (! is_file($path) || ! is_readable($path))
-		{
-			throw FileNotFoundException::forFileNotFound($path);
-		}
-
-		// Read in file binary data
-		$handle = fopen($path, 'rb');
-		$data   = fread($handle, filesize($path));
-		fclose($handle);
-
-		// Encode as base64
-		$data = base64_encode($data);
-
-		// Figure out the type (Hail Mary to JPEG)
-		$mime = $mime ?? Mimes::guessTypeFromExtension(pathinfo($path, PATHINFO_EXTENSION)) ?? 'image/jpg';
-
-		return 'data:' . $mime . ';base64,' . $data;
 	}
 }
 
@@ -220,13 +203,12 @@ if (! function_exists('doctype'))
 	 * xhtml-frame, html4-strict, html4-trans, and html4-frame.
 	 * All values are saved in the doctypes config file.
 	 *
-	 * @param string $type The doctype to be generated
-	 *
+	 * @param  string $type The doctype to be generated
 	 * @return string
 	 */
 	function doctype(string $type = 'html5'): string
 	{
-		$config   = new DocTypes();
+		$config   = new \Config\DocTypes();
 		$doctypes = $config->list;
 		return $doctypes[$type] ?? false;
 	}
@@ -241,9 +223,8 @@ if (! function_exists('script_tag'))
 	 *
 	 * Generates link to a JS file
 	 *
-	 * @param mixed   $src       Script source or an array
-	 * @param boolean $indexPage Should indexPage be added to the JS path
-	 *
+	 * @param  mixed   $src       Script source or an array
+	 * @param  boolean $indexPage Should indexPage be added to the JS path
 	 * @return string
 	 */
 	function script_tag($src = '', bool $indexPage = false): string
@@ -286,14 +267,13 @@ if (! function_exists('link_tag'))
 	 *
 	 * Generates link to a CSS file
 	 *
-	 * @param mixed   $href      Stylesheet href or an array
-	 * @param string  $rel
-	 * @param string  $type
-	 * @param string  $title
-	 * @param string  $media
-	 * @param boolean $indexPage should indexPage be added to the CSS path.
-	 * @param string  $hreflang
-	 *
+	 * @param  mixed   $href      Stylesheet href or an array
+	 * @param  string  $rel
+	 * @param  string  $type
+	 * @param  string  $title
+	 * @param  string  $media
+	 * @param  boolean $indexPage should indexPage be added to the CSS path.
+     	 * @param  string  $hreflang
 	 * @return string
 	 */
 	function link_tag($href = '', string $rel = 'stylesheet', string $type = 'text/css', string $title = '', string $media = '', bool $indexPage = false, string $hreflang = ''): string
@@ -307,7 +287,7 @@ if (! function_exists('link_tag'))
 			$type      = $href['type'] ?? $type;
 			$title     = $href['title'] ?? $title;
 			$media     = $href['media'] ?? $media;
-			$hreflang  = $href['hreflang'] ?? '';
+            		$hreflang  = $href['hreflang'] ?? '';
 			$indexPage = $href['indexPage'] ?? $indexPage;
 			$href      = $href['href'] ?? '';
 		}
@@ -330,14 +310,14 @@ if (! function_exists('link_tag'))
 
 		if ($hreflang !== '')
 		{
-			$link .= 'hreflang="' . $hreflang . '" ';
+		    $link .= 'hreflang="' . $hreflang .'" ';
 		}
 
 		$link .= 'rel="' . $rel . '" ';
 
-		if (! in_array($rel, ['alternate', 'canonical'], true))
+		if (! in_array($rel, ['alternate','canonical']))
 		{
-			$link .= 'type="' . $type . '" ';
+		    $link .= 'type="' . $type . '" ';
 		}
 
 		if ($media !== '')
@@ -364,12 +344,11 @@ if (! function_exists('video'))
 	 * Generates a video element to embed videos. The video element can
 	 * contain one or more video sources
 	 *
-	 * @param mixed   $src                Either a source string or an array of sources
-	 * @param string  $unsupportedMessage The message to display if the media tag is not supported by the browser
-	 * @param string  $attributes         HTML attributes
-	 * @param array   $tracks
-	 * @param boolean $indexPage
-	 *
+	 * @param  mixed   $src                Either a source string or an array of sources
+	 * @param  string  $unsupportedMessage The message to display if the media tag is not supported by the browser
+	 * @param  string  $attributes         HTML attributes
+	 * @param  array   $tracks
+	 * @param  boolean $indexPage
 	 * @return string
 	 */
 	function video($src, string $unsupportedMessage = '', string $attributes = '', array $tracks = [], bool $indexPage = false): string
@@ -545,11 +524,10 @@ if (! function_exists('source'))
 	 * Generates a source element that specifies multiple media resources
 	 * for either audio or video element
 	 *
-	 * @param string  $src        The path of the media resource
-	 * @param string  $type       The MIME-type of the resource with optional codecs parameters
-	 * @param string  $attributes HTML attributes
-	 * @param boolean $indexPage
-	 *
+	 * @param  string  $src        The path of the media resource
+	 * @param  string  $type       The MIME-type of the resource with optional codecs parameters
+	 * @param  string  $attributes HTML attributes
+	 * @param  boolean $indexPage
 	 * @return string
 	 */
 	function source(string $src, string $type = 'unknown', string $attributes = '', bool $indexPage = false): string
@@ -588,11 +566,10 @@ if (! function_exists('track'))
 	 * Generates a track element to specify timed tracks. The tracks are
 	 * formatted in WebVTT format.
 	 *
-	 * @param string $src         The path of the .VTT file
-	 * @param string $kind
-	 * @param string $srcLanguage
-	 * @param string $label
-	 *
+	 * @param  string $src         The path of the .VTT file
+	 * @param  string $kind
+	 * @param  string $srcLanguage
+	 * @param  string $label
 	 * @return string
 	 */
 	function track(string $src, string $kind, string $srcLanguage, string $label): string
@@ -665,11 +642,10 @@ if (! function_exists('param'))
 	 * Generates a param element that defines parameters
 	 * for the object element.
 	 *
-	 * @param string $name       The name of the parameter
-	 * @param string $value      The value of the parameter
-	 * @param string $type       The MIME-type
-	 * @param string $attributes HTML attributes
-	 *
+	 * @param  string $name       The name of the parameter
+	 * @param  string $value      The value of the parameter
+	 * @param  string $type       The MIME-type
+	 * @param  string $attributes HTML attributes
 	 * @return string
 	 */
 	function param(string $name, string $value, string $type = 'ref', string $attributes = ''): string
@@ -690,11 +666,10 @@ if (! function_exists('embed'))
 	 *
 	 * Generates an embed element
 	 *
-	 * @param string  $src        The path of the resource to embed
-	 * @param string  $type       MIME-type
-	 * @param string  $attributes HTML attributes
-	 * @param boolean $indexPage
-	 *
+	 * @param  string  $src        The path of the resource to embed
+	 * @param  string  $type       MIME-type
+	 * @param  string  $attributes HTML attributes
+	 * @param  boolean $indexPage
 	 * @return string
 	 */
 	function embed(string $src, string $type = 'unknown', string $attributes = '', bool $indexPage = false): string

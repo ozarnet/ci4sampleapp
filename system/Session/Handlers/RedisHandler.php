@@ -1,31 +1,57 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Session\Handlers;
 
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Session\Exceptions\SessionException;
-use Config\App as AppConfig;
-use Exception;
-use Redis;
-use RedisException;
 
 /**
  * Session handler using Redis for persistence
  */
-class RedisHandler extends BaseHandler
+class RedisHandler extends BaseHandler implements \SessionHandlerInterface
 {
+
 	/**
 	 * phpRedis instance
 	 *
-	 * @var Redis|null
+	 * @var resource
 	 */
 	protected $redis;
 
@@ -39,7 +65,7 @@ class RedisHandler extends BaseHandler
 	/**
 	 * Lock key
 	 *
-	 * @var string|null
+	 * @var string
 	 */
 	protected $lockKey;
 
@@ -62,12 +88,12 @@ class RedisHandler extends BaseHandler
 	/**
 	 * Constructor
 	 *
-	 * @param AppConfig $config
-	 * @param string    $ipAddress
+	 * @param BaseConfig $config
+	 * @param string     $ipAddress
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
-	public function __construct(AppConfig $config, string $ipAddress)
+	public function __construct(BaseConfig $config, string $ipAddress)
 	{
 		parent::__construct($config, $ipAddress);
 
@@ -75,10 +101,8 @@ class RedisHandler extends BaseHandler
 		{
 			throw SessionException::forEmptySavepath();
 		}
-
-		if (preg_match('#(?:tcp://)?([^:?]+)(?:\:(\d+))?(\?.+)?#', $this->savePath, $matches))
+		elseif (preg_match('#(?:tcp://)?([^:?]+)(?:\:(\d+))?(\?.+)?#', $this->savePath, $matches))
 		{
-			// @phpstan-ignore-next-line
 			isset($matches[3]) || $matches[3] = ''; // Just to avoid undefined index notices below
 
 			$this->savePath = [
@@ -113,18 +137,18 @@ class RedisHandler extends BaseHandler
 	 *
 	 * Sanitizes save_path and initializes connection.
 	 *
-	 * @param  string $savePath Server path
-	 * @param  string $name     Session cookie name, unused
+	 * @param  string $save_path Server path
+	 * @param  string $name      Session cookie name, unused
 	 * @return boolean
 	 */
-	public function open($savePath, $name): bool
+	public function open($save_path, $name): bool
 	{
 		if (empty($this->savePath))
 		{
 			return false;
 		}
 
-		$redis = new Redis();
+		$redis = new \Redis();
 
 		if (! $redis->connect($this->savePath['host'], $this->savePath['port'], $this->savePath['timeout']))
 		{
@@ -156,24 +180,24 @@ class RedisHandler extends BaseHandler
 	 *
 	 * @param string $sessionID Session ID
 	 *
-	 * @return string	Serialized session data
+	 * @return string|false	Serialized session data
 	 */
 	public function read($sessionID): string
 	{
 		if (isset($this->redis) && $this->lockSession($sessionID))
 		{
 			// Needed by write() to detect session_regenerate_id() calls
-			if (is_null($this->sessionID)) // @phpstan-ignore-line
+			if (is_null($this->sessionID))
 			{
 				$this->sessionID = $sessionID;
 			}
 
-			$sessionData                               = $this->redis->get($this->keyPrefix . $sessionID);
-			is_string($sessionData) ? $this->keyExists = true : $sessionData = '';
+			$session_data                               = $this->redis->get($this->keyPrefix . $sessionID);
+			is_string($session_data) ? $this->keyExists = true : $session_data = '';
 
-			$this->fingerprint = md5($sessionData);
+			$this->fingerprint = md5($session_data);
 
-			return $sessionData;
+			return $session_data;
 		}
 
 		return '';
@@ -197,9 +221,8 @@ class RedisHandler extends BaseHandler
 		{
 			return false;
 		}
-
 		// Was the ID regenerated?
-		if ($sessionID !== $this->sessionID)
+		elseif ($sessionID !== $this->sessionID)
 		{
 			if (! $this->releaseLock() || ! $this->lockSession($sessionID))
 			{
@@ -247,9 +270,8 @@ class RedisHandler extends BaseHandler
 		{
 			try
 			{
-				$pingReply = $this->redis->ping();
-				// @phpstan-ignore-next-line
-				if (($pingReply === true) || ($pingReply === '+PONG'))
+				$ping_reply = $this->redis->ping();
+				if (($ping_reply === true) || ($ping_reply === '+PONG'))
 				{
 					isset($this->lockKey) && $this->redis->del($this->lockKey);
 
@@ -259,7 +281,7 @@ class RedisHandler extends BaseHandler
 					}
 				}
 			}
-			catch (RedisException $e)
+			catch (\RedisException $e)
 			{
 				$this->logger->error('Session: Got RedisException on close(): ' . $e->getMessage());
 			}
@@ -336,24 +358,24 @@ class RedisHandler extends BaseHandler
 		}
 
 		// 30 attempts to obtain a lock, in case another request already has it
-		$lockKey = $this->keyPrefix . $sessionID . ':lock';
-		$attempt = 0;
+		$lock_key = $this->keyPrefix . $sessionID . ':lock';
+		$attempt  = 0;
 
 		do
 		{
-			if (($ttl = $this->redis->ttl($lockKey)) > 0)
+			if (($ttl = $this->redis->ttl($lock_key)) > 0)
 			{
 				sleep(1);
 				continue;
 			}
 
-			if (! $this->redis->setex($lockKey, 300, (string) time()))
+			if (! $this->redis->setex($lock_key, 300, time()))
 			{
 				$this->logger->error('Session: Error while trying to obtain lock for ' . $this->keyPrefix . $sessionID);
 				return false;
 			}
 
-			$this->lockKey = $lockKey;
+			$this->lockKey = $lock_key;
 			break;
 		}
 		while (++ $attempt < 30);
@@ -363,8 +385,7 @@ class RedisHandler extends BaseHandler
 			log_message('error', 'Session: Unable to obtain lock for ' . $this->keyPrefix . $sessionID . ' after 30 attempts, aborting.');
 			return false;
 		}
-
-		if ($ttl === -1)
+		elseif ($ttl === -1)
 		{
 			log_message('debug', 'Session: Lock for ' . $this->keyPrefix . $sessionID . ' had no TTL, overriding.');
 		}

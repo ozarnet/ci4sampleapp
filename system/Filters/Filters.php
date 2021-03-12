@@ -1,12 +1,40 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Filters;
@@ -14,15 +42,13 @@ namespace CodeIgniter\Filters;
 use CodeIgniter\Filters\Exceptions\FilterException;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Filters as FiltersConfig;
-use Config\Modules;
-use Config\Services;
 
 /**
  * Filters
  */
 class Filters
 {
+
 	/**
 	 * The processed filters that will
 	 * be used to check against.
@@ -35,27 +61,9 @@ class Filters
 	];
 
 	/**
-	 * The collection of filters' class names that will
-	 * be used to execute in each position.
-	 *
-	 * @var array
-	 */
-	protected $filtersClass = [
-		'before' => [],
-		'after'  => [],
-	];
-
-	/**
-	 * Any arguments to be passed to filtersClass.
-	 *
-	 * @var array
-	 */
-	protected $argumentsClass = [];
-
-	/**
 	 * The original config file
 	 *
-	 * @var FiltersConfig
+	 * @var \Config\Filters
 	 */
 	protected $config;
 
@@ -88,59 +96,20 @@ class Filters
 	 */
 	protected $arguments = [];
 
-	/**
-	 * Handle to the modules config.
-	 *
-	 * @var Modules
-	 */
-	protected $modules;
+	//--------------------------------------------------------------------
 
 	/**
 	 * Constructor.
 	 *
-	 * @param FiltersConfig     $config
+	 * @param \Config\Filters   $config
 	 * @param RequestInterface  $request
 	 * @param ResponseInterface $response
-	 * @param Modules|null      $modules
 	 */
-	public function __construct($config, RequestInterface $request, ResponseInterface $response, Modules $modules = null)
+	public function __construct($config, RequestInterface $request, ResponseInterface $response)
 	{
 		$this->config  = $config;
 		$this->request = &$request;
 		$this->setResponse($response);
-
-		$this->modules = $modules ?? config('Modules');
-	}
-
-	/**
-	 * If discoverFilters is enabled in Config then system will try to
-	 * auto-discover custom filters files in Namespaces and allow access to
-	 * the config object via the variable $customfilters as with the routes file
-	 *
-	 * Sample :
-	 * $filters->aliases['custom-auth'] = \Acme\Blob\Filters\BlobAuth::class;
-	 */
-	private function discoverFilters()
-	{
-		$locator = Services::locator();
-
-		// for access by custom filters
-		$filters = $this->config;
-
-		$files = $locator->search('Config/Filters.php');
-
-		foreach ($files as $file)
-		{
-			$className = $locator->getClassname($file);
-
-			// Don't include our main Filter config again...
-			if ($className === 'Config\\Filters')
-			{
-				continue;
-			}
-
-			include $file;
-		}
 	}
 
 	/**
@@ -153,6 +122,8 @@ class Filters
 		$this->response = &$response;
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Runs through all of the filters for the specified
 	 * uri and position.
@@ -160,63 +131,86 @@ class Filters
 	 * @param string $uri
 	 * @param string $position
 	 *
-	 * @return RequestInterface|ResponseInterface|mixed
-	 * @throws FilterException
+	 * @return \CodeIgniter\HTTP\RequestInterface|\CodeIgniter\HTTP\ResponseInterface|mixed
+	 * @throws \CodeIgniter\Filters\Exceptions\FilterException
 	 */
 	public function run(string $uri, string $position = 'before')
 	{
 		$this->initialize(strtolower($uri));
 
-		foreach ($this->filtersClass[$position] as $className)
+		foreach ($this->filters[$position] as $alias => $rules)
 		{
-			$class = new $className();
-
-			if (! $class instanceof FilterInterface)
+			if (is_numeric($alias) && is_string($rules))
 			{
-				throw FilterException::forIncorrectInterface(get_class($class));
+				$alias = $rules;
 			}
 
-			if ($position === 'before')
+			if (! array_key_exists($alias, $this->config->aliases))
 			{
-				$result = $class->before($this->request, $this->argumentsClass[$className] ?? null);
+				throw FilterException::forNoAlias($alias);
+			}
 
-				if ($result instanceof RequestInterface)
+			if (is_array($this->config->aliases[$alias]))
+			{
+				$classNames = $this->config->aliases[$alias];
+			}
+			else
+			{
+				$classNames = [$this->config->aliases[$alias]];
+			}
+
+			foreach ($classNames as $className)
+			{
+				$class = new $className();
+
+				if (! $class instanceof FilterInterface)
 				{
-					$this->request = $result;
-					continue;
+					throw FilterException::forIncorrectInterface(get_class($class));
 				}
 
-				// If the response object was sent back,
-				// then send it and quit.
-				if ($result instanceof ResponseInterface)
+				if ($position === 'before')
 				{
-					// short circuit - bypass any other filters
+					$result = $class->before($this->request, $this->arguments[$alias] ?? null);
+
+					if ($result instanceof RequestInterface)
+					{
+						$this->request = $result;
+						continue;
+					}
+
+					// If the response object was sent back,
+					// then send it and quit.
+					if ($result instanceof ResponseInterface)
+					{
+						// short circuit - bypass any other filters
+						return $result;
+					}
+
+					// Ignore an empty result
+					if (empty($result))
+					{
+						continue;
+					}
+
 					return $result;
 				}
-				// Ignore an empty result
-				if (empty($result))
+				elseif ($position === 'after')
 				{
-					continue;
-				}
+					$result = $class->after($this->request, $this->response, $this->arguments[$alias] ?? null);
 
-				return $result;
-			}
-
-			if ($position === 'after')
-			{
-				$result = $class->after($this->request, $this->response, $this->argumentsClass[$className] ?? null);
-
-				if ($result instanceof ResponseInterface)
-				{
-					$this->response = $result;
-
-					continue;
+					if ($result instanceof ResponseInterface)
+					{
+						$this->response = $result;
+						continue;
+					}
 				}
 			}
 		}
 
 		return $position === 'before' ? $this->request : $this->response;
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Runs through our list of filters provided by the configuration
@@ -242,32 +236,16 @@ class Filters
 			return $this;
 		}
 
-		if ($this->modules->shouldDiscover('filters'))
-		{
-			$this->discoverFilters();
-		}
-
 		$this->processGlobals($uri);
 		$this->processMethods();
 		$this->processFilters($uri);
-
-		// Set the toolbar filter to the last position to be executed
-		if (in_array('toolbar', $this->filters['after'], true) &&
-			($count = count($this->filters['after'])) > 1 &&
-			$this->filters['after'][$count - 1] !== 'toolbar'
-		)
-		{
-			array_splice($this->filters['after'], array_search('toolbar', $this->filters['after'], true), 1);
-			$this->filters['after'][] = 'toolbar';
-		}
-
-		$this->processAliasesToClass('before');
-		$this->processAliasesToClass('after');
 
 		$this->initialized = true;
 
 		return $this;
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Returns the processed filters array.
@@ -277,16 +255,6 @@ class Filters
 	public function getFilters(): array
 	{
 		return $this->filters;
-	}
-
-	/**
-	 * Returns the filtersClass array.
-	 *
-	 * @return array
-	 */
-	public function getFiltersClass(): array
-	{
-		return $this->filtersClass;
 	}
 
 	/**
@@ -322,6 +290,8 @@ class Filters
 		return $this;
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
 	 * Ensures that a specific filter is on and enabled for the current request.
 	 *
@@ -332,7 +302,7 @@ class Filters
 	 * @param string $name
 	 * @param string $when
 	 *
-	 * @return Filters
+	 * @return \CodeIgniter\Filters\Filters
 	 */
 	public function enableFilter(string $name, string $when = 'before')
 	{
@@ -354,21 +324,15 @@ class Filters
 			throw FilterException::forNoAlias($name);
 		}
 
-		$classNames = (array) $this->config->aliases[$name];
-
-		foreach ($classNames as $className)
-		{
-			$this->argumentsClass[$className] = $this->arguments[$name] ?? null;
-		}
-
 		if (! isset($this->filters[$when][$name]))
 		{
-			$this->filters[$when][]    = $name;
-			$this->filtersClass[$when] = array_merge($this->filtersClass[$when], $classNames);
+			$this->filters[$when][] = $name;
 		}
 
 		return $this;
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Returns the arguments for a specified key, or all.
@@ -382,6 +346,7 @@ class Filters
 		return is_null($key) ? $this->arguments : $this->arguments[$key];
 	}
 
+	//--------------------------------------------------------------------
 	//--------------------------------------------------------------------
 	// Processors
 	//--------------------------------------------------------------------
@@ -443,8 +408,10 @@ class Filters
 		}
 	}
 
+	//--------------------------------------------------------------------
+
 	/**
-	 * Add any method-specific filters to the mix.
+	 * Add any method-specific flters to the mix.
 	 *
 	 * @return void
 	 */
@@ -464,6 +431,8 @@ class Filters
 			return;
 		}
 	}
+
+	//--------------------------------------------------------------------
 
 	/**
 	 * Add any applicable configured filters to the mix.
@@ -506,44 +475,6 @@ class Filters
 	}
 
 	/**
-	 * Maps filter aliases to the equivalent filter classes
-	 *
-	 * @param  string $position
-	 * @throws FilterException
-	 *
-	 * @return void
-	 */
-	protected function processAliasesToClass(string $position)
-	{
-		foreach ($this->filters[$position] as $alias => $rules)
-		{
-			if (is_numeric($alias) && is_string($rules))
-			{
-				$alias = $rules;
-			}
-
-			if (! array_key_exists($alias, $this->config->aliases))
-			{
-				throw FilterException::forNoAlias($alias);
-			}
-
-			if (is_array($this->config->aliases[$alias]))
-			{
-				$this->filtersClass[$position] = array_merge($this->filtersClass[$position], $this->config->aliases[$alias]);
-			}
-			else
-			{
-				$this->filtersClass[$position][] = $this->config->aliases[$alias];
-			}
-		}
-
-		// when using enableFilter() we already write the class name in ->filtersClass as well as the
-		// alias in ->filters. This leads to duplicates when using route filters.
-		// Since some filters like rate limiters rely on being executed once a request we filter em here.
-		$this->filtersClass[$position] = array_unique($this->filtersClass[$position]);
-	}
-
-	/**
 	 * Check paths for match for URI
 	 *
 	 * @param string $uri   URI to test against
@@ -581,4 +512,5 @@ class Filters
 
 		return false;
 	}
+
 }

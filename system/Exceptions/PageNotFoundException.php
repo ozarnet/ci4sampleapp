@@ -1,22 +1,7 @@
-<?php
+<?php namespace CodeIgniter\Exceptions;
 
-/**
- * This file is part of the CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-namespace CodeIgniter\Exceptions;
-
-use OutOfBoundsException;
-
-class PageNotFoundException extends OutOfBoundsException implements ExceptionInterface
+class PageNotFoundException extends \OutOfBoundsException implements ExceptionInterface
 {
-	use DebugTraceableTrait;
-
 	/**
 	 * Error code
 	 *

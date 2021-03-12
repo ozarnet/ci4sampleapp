@@ -1,15 +1,4 @@
-<?php
-
-/**
- * This file is part of the CodeIgniter 4 framework.
- *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
-namespace CodeIgniter\Test\Mock;
+<?php namespace CodeIgniter\Test\Mock;
 
 use CodeIgniter\Database\BaseResult;
 
@@ -22,7 +11,6 @@ class MockResult extends BaseResult
 	 */
 	public function getFieldCount(): int
 	{
-		return 0;
 	}
 
 	//--------------------------------------------------------------------
@@ -34,7 +22,6 @@ class MockResult extends BaseResult
 	 */
 	public function getFieldNames(): array
 	{
-		return [];
 	}
 
 	//--------------------------------------------------------------------
@@ -46,7 +33,6 @@ class MockResult extends BaseResult
 	 */
 	public function getFieldData(): array
 	{
-		return [];
 	}
 
 	//--------------------------------------------------------------------
@@ -101,19 +87,6 @@ class MockResult extends BaseResult
 	 */
 	protected function fetchObject($className = 'stdClass')
 	{
-		return new $className;
-	}
-
-	//--------------------------------------------------------------------
-
-	/**
-	 * Gets the number of fields in the result set.
-	 *
-	 * @return integer
-	 */
-	public function getNumRows(): int
-	{
-		return 0;
 	}
 
 	//--------------------------------------------------------------------

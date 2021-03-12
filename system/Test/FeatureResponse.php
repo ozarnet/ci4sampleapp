@@ -1,20 +1,46 @@
 <?php
-
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Test;
 
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\ResponseInterface;
-use Config\Services;
-use Exception;
+use Config\Format;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,6 +48,7 @@ use PHPUnit\Framework\TestCase;
  */
 class FeatureResponse extends TestCase
 {
+
 	/**
 	 * The response.
 	 *
@@ -32,7 +59,7 @@ class FeatureResponse extends TestCase
 	/**
 	 * DOM for the body.
 	 *
-	 * @var DOMParser
+	 * @var \CodeIgniter\Test\DOMParser
 	 */
 	protected $domParser;
 
@@ -83,25 +110,23 @@ class FeatureResponse extends TestCase
 	}
 
 	/**
-	 * Returns whether or not the Response was a redirect or RedirectResponse
+	 * Returns whether or not the Response was a redirect response
 	 *
 	 * @return boolean
 	 */
 	public function isRedirect(): bool
 	{
-		return $this->response instanceof RedirectResponse
-			|| $this->response->hasHeader('Location')
-			|| $this->response->hasHeader('Refresh');
+		return $this->response instanceof RedirectResponse;
 	}
 
 	/**
 	 * Assert that the given response was a redirect.
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertRedirect()
 	{
-		$this->assertTrue($this->isRedirect(), 'Response is not a redirect or RedirectResponse.');
+		$this->assertTrue($this->isRedirect(), 'Response is not a RedirectResponse.');
 	}
 
 	/**
@@ -120,8 +145,7 @@ class FeatureResponse extends TestCase
 		{
 			return $this->response->getHeaderLine('Location');
 		}
-
-		if ($this->response->hasHeader('Refresh'))
+		elseif ($this->response->hasHeader('Refresh'))
 		{
 			return str_replace('0;url=', '', $this->response->getHeaderLine('Refresh'));
 		}
@@ -134,17 +158,17 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param integer $code
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertStatus(int $code)
 	{
-		$this->assertEquals($code, $this->response->getStatusCode());
+		$this->assertEquals($code, (int) $this->response->getStatusCode());
 	}
 
 	/**
 	 * Asserts that the Response is considered OK.
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertOK()
 	{
@@ -158,10 +182,10 @@ class FeatureResponse extends TestCase
 	/**
 	 * Asserts that an SESSION key has been set and, optionally, test it's value.
 	 *
-	 * @param string      $key
-	 * @param string|null $value
+	 * @param string $key
+	 * @param null   $value
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSessionHas(string $key, $value = null)
 	{
@@ -178,7 +202,7 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param string $key
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSessionMissing(string $key)
 	{
@@ -192,10 +216,10 @@ class FeatureResponse extends TestCase
 	/**
 	 * Asserts that the Response contains a specific header.
 	 *
-	 * @param string      $key
-	 * @param string|null $value
+	 * @param string $key
+	 * @param null   $value
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertHeader(string $key, $value = null)
 	{
@@ -212,7 +236,7 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param string $key
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertHeaderMissing(string $key)
 	{
@@ -227,10 +251,10 @@ class FeatureResponse extends TestCase
 	 * Asserts that the response has the specified cookie.
 	 *
 	 * @param string      $key
-	 * @param string|null $value
-	 * @param string      $prefix
+	 * @param null        $value
+	 * @param string|null $prefix
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertCookie(string $key, $value = null, string $prefix = '')
 	{
@@ -253,7 +277,7 @@ class FeatureResponse extends TestCase
 	 * @param string $key
 	 * @param string $prefix
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertCookieExpired(string $key, string $prefix = '')
 	{
@@ -271,7 +295,7 @@ class FeatureResponse extends TestCase
 	 * @param string|null $search
 	 * @param string|null $element
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSee(string $search = null, string $element = null)
 	{
@@ -284,7 +308,7 @@ class FeatureResponse extends TestCase
 	 * @param string|null $search
 	 * @param string|null $element
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertDontSee(string $search = null, string $element = null)
 	{
@@ -296,7 +320,7 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param string $search
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSeeElement(string $search)
 	{
@@ -308,7 +332,7 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param string $search
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertDontSeeElement(string $search)
 	{
@@ -321,7 +345,7 @@ class FeatureResponse extends TestCase
 	 * @param string      $text
 	 * @param string|null $details
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSeeLink(string $text, string $details = null)
 	{
@@ -334,7 +358,7 @@ class FeatureResponse extends TestCase
 	 * @param string      $field
 	 * @param string|null $value
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertSeeInField(string $field, string $value = null)
 	{
@@ -365,24 +389,15 @@ class FeatureResponse extends TestCase
 	/**
 	 * Test that the response contains a matching JSON fragment.
 	 *
-	 * @param array   $fragment
-	 * @param boolean $strict
+	 * @param array $fragment
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
-	public function assertJSONFragment(array $fragment, bool $strict = false)
+	public function assertJSONFragment(array $fragment)
 	{
-		$json    = json_decode($this->getJSON(), true);
-		$patched = array_replace_recursive($json, $fragment);
+		$json = json_decode($this->getJSON(), true);
 
-		if ($strict)
-		{
-			$this->assertSame($json, $patched, 'Response does not contain a matching JSON fragment.');
-		}
-		else
-		{
-			$this->assertEquals($json, $patched, 'Response does not contain a matching JSON fragment.');
-		}
+		$this->assertArraySubset($fragment, $json, false, 'Response does not contain a matching JSON fragment.');
 	}
 
 	/**
@@ -391,7 +406,7 @@ class FeatureResponse extends TestCase
 	 *
 	 * @param string|array $test
 	 *
-	 * @throws Exception
+	 * @throws \Exception
 	 */
 	public function assertJSONExact($test)
 	{
@@ -399,7 +414,9 @@ class FeatureResponse extends TestCase
 
 		if (is_array($test))
 		{
-			$test = Services::format()->getFormatter('application/json')->format($test);
+			$config    = new Format();
+			$formatter = $config->getFormatter('application/json');
+			$test      = $formatter->format($test);
 		}
 
 		$this->assertJsonStringEqualsJsonString($test, $json, 'Response does not contain matching JSON.');
@@ -418,4 +435,5 @@ class FeatureResponse extends TestCase
 	{
 		return $this->response->getXML();
 	}
+
 }

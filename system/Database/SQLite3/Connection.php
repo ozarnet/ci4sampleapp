@@ -1,28 +1,54 @@
 <?php
 
 /**
- * This file is part of the CodeIgniter 4 framework.
+ * CodeIgniter
  *
- * (c) CodeIgniter Foundation <admin@codeigniter.com>
+ * An open source application development framework for PHP
  *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
+ * This content is released under the MIT License (MIT)
+ *
+ * Copyright (c) 2014-2019 British Columbia Institute of Technology
+ * Copyright (c) 2019-2020 CodeIgniter Foundation
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ * @package    CodeIgniter
+ * @author     CodeIgniter Dev Team
+ * @copyright  2019-2020 CodeIgniter Foundation
+ * @license    https://opensource.org/licenses/MIT	MIT License
+ * @link       https://codeigniter.com
+ * @since      Version 4.0.0
+ * @filesource
  */
 
 namespace CodeIgniter\Database\SQLite3;
 
 use CodeIgniter\Database\BaseConnection;
+use CodeIgniter\Database\ConnectionInterface;
 use CodeIgniter\Database\Exceptions\DatabaseException;
-use ErrorException;
-use Exception;
-use SQLite3;
-use stdClass;
 
 /**
  * Connection for SQLite3
  */
-class Connection extends BaseConnection
+class Connection extends BaseConnection implements ConnectionInterface
 {
+
 	/**
 	 * Database driver
 	 *
@@ -40,16 +66,27 @@ class Connection extends BaseConnection
 	//--------------------------------------------------------------------
 
 	/**
+	 * ORDER BY random keyword
+	 *
+	 * @var array
+	 */
+	protected $_random_keyword = [
+		'RANDOM()',
+	];
+
+	//--------------------------------------------------------------------
+
+	/**
 	 * Connect to the database.
 	 *
 	 * @param boolean $persistent
 	 *
 	 * @return mixed
-	 * @throws DatabaseException
+	 * @throws \CodeIgniter\Database\Exceptions\DatabaseException
 	 */
 	public function connect(bool $persistent = false)
 	{
-		if ($persistent && $this->DBDebug)
+		if ($persistent && $this->db->DBDebug)
 		{
 			throw new DatabaseException('SQLite3 doesn\'t support persistent connections.');
 		}
@@ -61,10 +98,10 @@ class Connection extends BaseConnection
 			}
 
 			return (! $this->password)
-				? new SQLite3($this->database)
-				: new SQLite3($this->database, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, $this->password);
+				? new \SQLite3($this->database)
+				: new \SQLite3($this->database, SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE, $this->password);
 		}
-		catch (Exception $e)
+		catch (\Exception $e)
 		{
 			throw new DatabaseException('SQLite3 error: ' . $e->getMessage());
 		}
@@ -124,7 +161,7 @@ class Connection extends BaseConnection
 			return $this->dataCache['version'];
 		}
 
-		$version = SQLite3::version();
+		$version = \SQLite3::version();
 
 		return $this->dataCache['version'] = $version['versionString'];
 	}
@@ -146,7 +183,7 @@ class Connection extends BaseConnection
 				? $this->connID->exec($sql)
 				: $this->connID->query($sql);
 		}
-		catch (ErrorException $e)
+		catch (\ErrorException $e)
 		{
 			log_message('error', $e);
 			if ($this->DBDebug)
@@ -237,7 +274,15 @@ class Connection extends BaseConnection
 			$this->initialize();
 		}
 
-		$sql = $this->_listColumns($table);
+		if (false === ($sql = $this->_listColumns($table)))
+		{
+			if ($this->DBDebug)
+			{
+				throw new DatabaseException(lang('Database.featureUnavailable'));
+			}
+
+			return false;
+		}
 
 		$query                                  = $this->query($sql);
 		$this->dataCache['field_names'][$table] = [];
@@ -278,7 +323,7 @@ class Connection extends BaseConnection
 	 * Returns an array of objects with field data
 	 *
 	 * @param  string $table
-	 * @return stdClass[]
+	 * @return \stdClass[]
 	 * @throws DatabaseException
 	 */
 	public function _fieldData(string $table): array
@@ -297,13 +342,13 @@ class Connection extends BaseConnection
 		$retVal = [];
 		for ($i = 0, $c = count($query); $i < $c; $i++)
 		{
-			$retVal[$i]              = new stdClass();
+			$retVal[$i]              = new \stdClass();
 			$retVal[$i]->name        = $query[$i]->name;
 			$retVal[$i]->type        = $query[$i]->type;
 			$retVal[$i]->max_length  = null;
 			$retVal[$i]->default     = $query[$i]->dflt_value;
-			$retVal[$i]->primary_key = isset($query[$i]->pk) && (bool) $query[$i]->pk;
-			$retVal[$i]->nullable    = isset($query[$i]->notnull) && ! (bool) $query[$i]->notnull;
+			$retVal[$i]->primary_key = isset($query[$i]->pk) && (bool)$query[$i]->pk;
+			$retVal[$i]->nullable    = isset($query[$i]->notnull) && ! (bool)$query[$i]->notnull;
 		}
 
 		return $retVal;
@@ -315,7 +360,7 @@ class Connection extends BaseConnection
 	 * Returns an array of objects with index data
 	 *
 	 * @param  string $table
-	 * @return stdClass[]
+	 * @return \stdClass[]
 	 * @throws DatabaseException
 	 */
 	public function _indexData(string $table): array
@@ -332,7 +377,7 @@ class Connection extends BaseConnection
 		$retVal = [];
 		foreach ($query as $row)
 		{
-			$obj       = new stdClass();
+			$obj       = new \stdClass();
 			$obj->name = $row->name;
 
 			// Get fields for index
@@ -360,7 +405,7 @@ class Connection extends BaseConnection
 	 * Returns an array of objects with Foreign key data
 	 *
 	 * @param  string $table
-	 * @return stdClass[]
+	 * @return \stdClass[]
 	 */
 	public function _foreignKeyData(string $table): array
 	{
@@ -384,7 +429,7 @@ class Connection extends BaseConnection
 
 			foreach ($query as $row)
 			{
-				$obj                     = new stdClass();
+				$obj                     = new \stdClass();
 				$obj->constraint_name    = $row->from . ' to ' . $row->table . '.' . $row->to;
 				$obj->table_name         = $table;
 				$obj->foreign_table_name = $row->table;
@@ -497,7 +542,7 @@ class Connection extends BaseConnection
 	 */
 	public function isWriteType($sql): bool
 	{
-		return (bool) preg_match(
+		return (bool)preg_match(
 			'/^\s*"?(SET|INSERT|UPDATE|DELETE|REPLACE|CREATE|DROP|TRUNCATE|LOAD|COPY|ALTER|RENAME|GRANT|REVOKE|LOCK|UNLOCK|REINDEX)\s/i',
 			$sql);
 	}
@@ -514,7 +559,7 @@ class Connection extends BaseConnection
 	{
 		$result = $this->simpleQuery('PRAGMA foreign_keys');
 
-		return (bool) $result;
+		return (bool)$result;
 	}
 
 	//--------------------------------------------------------------------

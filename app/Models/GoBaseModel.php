@@ -83,24 +83,14 @@ abstract class GoBaseModel extends Model {
         $theseConditionsAreMet = [];
 
         if ($onlyActiveOnes) {
-            if ( in_array('enabled', $this->allowedFields) ) {
-                $theseConditionsAreMet['enabled'] = true;
-            } elseif (in_array('active', $this->allowedFields)) {
-                $theseConditionsAreMet['active'] = true;
-            }
+            $theseConditionsAreMet['enabled']=true;
         }
 
-        // This check is deprecated and left here only for backward compatibility and this method should be overridden in extending classes so as to check if the bound entity class has these attributes
         if (!$alsoDeletedOnes) {
-            if (in_array('deleted_at', $this->allowedFields)) {
-                $theseConditionsAreMet['deleted_at'] = null;
-            }
-            if (in_array('deleted', $this->allowedFields) ) {
-                $theseConditionsAreMet['deleted'] = false;
-            }
-            if (in_array('date_time_deleted', $this->allowedFields)) {
-                $theseConditionsAreMet['date_time_deleted'] = null;
-            }
+            if (property_exists($this, 'deleted'))
+                $theseConditionsAreMet['deleted']=false;
+            if (property_exists($this, 'date_time_deleted'))
+                $theseConditionsAreMet['date_time_deleted']=null;
         }
 
         if (!empty($additionalConditions)) {
@@ -127,7 +117,7 @@ abstract class GoBaseModel extends Model {
      * @param array $additionalConditions
      * @return array for use in dropdown menus
      */
-    public function getAllForCiMenu( $columns2select = ['id', 'designation'], $sortResultsBy = 'id', bool $onlyActiveOnes=false, $selectionRequestLabel = 'Please select one...',  bool $alsoDeletedOnes = true, $additionalConditions = []) {
+    public function getAllForCiMenu( $columns2select = ['id', 'designation'], $sortResultsBy = 'id', bool $onlyActiveOnes=false, string $select1str = 'Please select one...',  bool $alsoDeletedOnes = true, $additionalConditions = []) {
 
         $ciDropDownOptions = [];
 
@@ -158,11 +148,7 @@ abstract class GoBaseModel extends Model {
         $resultList = $this->getAllForMenu($cols2selectStr, $sortResultsBy, $onlyActiveOnes, $alsoDeletedOnes, $additionalConditions);
 
         if ($resultList != false) {
-            
-            if (!empty($selectionRequestLabel)) {
-                $ciDropDownOptions[''] = $selectionRequestLabel;
-            }
-
+            $ciDropDownOptions[''] = $select1str ?? 'Please select one...';
             foreach ($resultList as $res) {
 
                 if (isset($res->$key) && isset($res->$val)) {
