@@ -8,9 +8,6 @@ CodeIgniter Wizard is a Rapid Application Development utility which helps quickl
 With a database-first approach, the wizard asks you to select the tables and fields you want to include in your application, and then it automatically generates the necessary models, views and controllers - even the new CodeIgniter 4 entities, supporting standard database CRUD operations namely create, read, update and delete. It even creates a sidebar and (dashboard) home pages automatically with some basic data from your modules.
 More information can be found at the [official site of CodeIgniter Wizard](https://www.ozar.net/products/codeigniterwizard/).
 
-## Video of the End-to-End Demo of Making of this App
-[![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
-
 ## Screenshots
 
 ### Form View
@@ -21,6 +18,18 @@ More information can be found at the [official site of CodeIgniter Wizard](https
 
 ### Underlying Database
 An SQL dump of the database is present at the root of the project. The current version is ccpv4.sql.
+
+## Video of the End-to-End Demo of Making of this App
+[![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+[On YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+
+## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
+### Installing Homebrew on macOS Big Sur
+[![Installing Homebrew on macOS Big Sur](https://img.youtube.com/vi/_n2YexLCN8c/0.jpg)](https://www.youtube.com/watch?v=_n2YexLCN8c)
+[On YouTube](https://www.youtube.com/watch?v=_n2YexLCN8c)
+### Installing PHP 8 via Homebrew on macOS Big Sur
+[![Installing PHP 8 via Homebrew on macOS Big Sur](https://img.youtube.com/vi/UK7zPZlUkZg/0.jpg)](https://www.youtube.com/watch?v=UK7zPZlUkZg)
+[On YouTube](https://www.youtube.com/watch?v=UK7zPZlUkZg)
 
 ### Database E-R Diagram
 ![Database E-R Diagram](NavicatModelScreenshot.png)
