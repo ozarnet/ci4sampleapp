@@ -21,7 +21,9 @@ An SQL dump of the database is present at the root of the project. The current v
 
 ## Video of the End-to-End Demo of Making of this App
 [![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
-[On YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+
 
 ## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
 
