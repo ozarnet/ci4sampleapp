@@ -1,11 +1,55 @@
-# CodeIgniter 4 Framework
+# Countries Cities People
+**A Sample CodeIgniter 4 web application created with [CodeIgniter Wizard](https://www.ozar.net/products) using the responsive Bootstrap4-based AdminLTE v3 template**
 
-## What is CodeIgniter?
+This is a database-driven sample CodeIgniter 4 project generated with the 'CodeIgniter Wizard' Mac application. The source code is what you get from the CRUD code generator and has not been manually edited outside the wizard application for an accurate demonstration of the capabilities of the code generator, as well as the quality of the re-usable code it generates. 
+
+## What is CodeIgniter Wizard?
+
+CodeIgniter Wizard is a Rapid Application Development utility which helps quickly generate an advanced starting point for MySQL/MariaDB database-driven web applications with administrative interfaces.
+
+With a database-first approach, the wizard asks you to select the tables and fields you want to include in your application, and then it automatically generates the necessary models, views and controllers - even the new CodeIgniter 4 entities, supporting standard database CRUD operations namely create, read, update and delete. It even creates a sidebar and (dashboard) home pages automatically with some basic data from your modules.
+More information can be found at the [official site of CodeIgniter Wizard](https://www.ozar.net/products/codeigniterwizard/).
+
+## Screenshots
+
+### Form View
+![Adding / Editing a new record](screenshot1.png)
+
+### Grid View
+![Grid View](screenshot2.png)
+
+### Underlying Database
+An SQL dump of the database is present at the root of the project. The current version is ccpv4.sql.
+
+## Video of the End-to-End Demo of Making of this App
+[![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+
+
+## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
+
+### Installing Homebrew on macOS Big Sur
+[![Installing Homebrew on macOS Big Sur](https://img.youtube.com/vi/_n2YexLCN8c/0.jpg)](https://www.youtube.com/watch?v=_n2YexLCN8c)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=_n2YexLCN8c)
+
+### Installing PHP 8 via Homebrew on macOS Big Sur
+[![Installing PHP 8 via Homebrew on macOS Big Sur](https://img.youtube.com/vi/UK7zPZlUkZg/0.jpg)](https://www.youtube.com/watch?v=UK7zPZlUkZg)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=UK7zPZlUkZg)
+
+### Database E-R Diagram
+![Database E-R Diagram](NavicatModelScreenshot.png)
+
+A [tutorial](https://www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action/) for designing the relational data model in Navicat and then exporting (DDL of) it to a database can be found at [www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action](https://www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action/)
+
+## About the Open-source CodeIgniter Framework
 
 CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure.
 More information can be found at the [official site](http://codeigniter.com).
 
-This repository holds the distributable version of the framework,
+CodeIgniter4 repository holds the distributable version of the framework,
 including the user guide. It has been built from the
 [development repository](https://github.com/codeigniter4/CodeIgniter4).
 
@@ -15,7 +59,7 @@ The user guide corresponding to this version of the framework can be found
 [here](https://codeigniter4.github.io/userguide/).
 
 
-## Important Change with index.php
+## Important Change with index.php from CodeIgniter version 3
 
 `index.php` is no longer in the root of the project! It has been moved inside the *public* folder,
 for better security and separation of components.
