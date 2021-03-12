@@ -22,16 +22,16 @@ class PeopleController extends GoBaseController {
     protected $indexRoute = 'people';
 
     protected $formValidationRules = [
-		'score' => 'decimal|permit_empty',
-		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
-		'last_name' => 'trim|required|max_length[50]',
-		'person_type' => 'max_length[31]',
+		'phone_number' => 'trim|max_length[20]',
 		'birth_date' => 'valid_date|permit_empty',
+		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
 		'middle_name' => 'trim|max_length[40]',
+		'first_name' => 'trim|required|max_length[40]',
+		'person_type' => 'max_length[31]',
+		'last_name' => 'trim|required|max_length[50]',
 		'sex' => 'trim',
 		'notes' => 'trim|max_length[16313]',
-		'first_name' => 'trim|required|max_length[40]',
-		'phone_number' => 'trim|max_length[20]',
+		'score' => 'decimal|permit_empty',
 		];
 
     public function index() {

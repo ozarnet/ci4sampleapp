@@ -7,9 +7,9 @@ use App\Models\Collection;
 
 use App\Entities\City;
 
-use App\Models\CityModel;
-
 use App\Models\CountryModel;
+
+use App\Models\CityModel;
 
 class CitiesController extends GoBaseResourceController { 
 
@@ -27,8 +27,8 @@ class CitiesController extends GoBaseResourceController {
     protected $indexRoute = 'cities';
     
     protected $formValidationRules = [
-    		'city_name' => 'trim|required|max_length[60]',
-		'country_code' => 'trim',
+    		'country_code' => 'trim',
+		'city_name' => 'trim|required|max_length[60]',
 		];
     
     public function index() {

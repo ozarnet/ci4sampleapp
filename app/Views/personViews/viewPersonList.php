@@ -2,24 +2,13 @@
 <?=$this->extend('Themes/'.config('Basics')->theme['name'].'/AdminLayout/defaultLayout') ?>
 <?=$this->section('content');  ?>
 <div class="row">
-	<div class="col-md-12">
+    <div class="col-md-12">
 
-		<div class="card card-info">
-			<div class="card-header">
-				<h3 class="card-title">Person List</h3>
-				<div class="card-tools">
-					<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
-						<i class="fas fa-minus"></i>
-					</button>
-
-					<button type="button" class="btn btn-tool" data-card-widget="remove" data-toggle="tooltip" title="Remove">
-						<i class="fas fa-times"></i>
-					</button>
-
-				</div><!--//.card-tools -->
-
-			</div><!--//.card-header -->
-			<div class="card-body">
+        <div class="card card-info">
+            <div class="card-header">
+                <h3 class="card-title">Person List</h3>
+           </div><!--//.card-header -->
+            <div class="card-body">
 				<?= view('Themes/_commonPartials/_alertBoxes'); ?>
 
 					<table id="tableOfPeople" class="table table-striped table-hover using-data-table">
@@ -111,12 +100,12 @@
 						<?php endforeach; ?>
 						</tbody>
 					</table>
-			</div><!--//.card-body -->
-			<div class="card-footer">
+            </div><!--//.card-body -->
+            <div class="card-footer">
 				<?=anchor(route_to('newPerson'), 'Add a New Person', ['class'=>'btn btn-primary']); ?>
-			</div><!--//.card-footer -->
-		</div><!--//.card -->
-	</div><!--//.col -->
+            </div><!--//.card-footer -->
+        </div><!--//.card -->
+    </div><!--//.col -->
 </div><!--//.row -->
 
 <?=$this->endSection() ?>

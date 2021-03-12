@@ -33,18 +33,10 @@ class Basics extends BaseConfig {
 	public $authImplemented = false;
 
 
-//--------------------------------------------------------------------------
-// Theme options
-//
-// BG: blue, indigo, purple, pink, red, orange, yellow, green, teal, cyan,
-//     gray, gray-dark, black
-// Type: dark, light
-// Shadow: 0-4
-//
-//--------------------------------------------------------------------------
+
 
 	public $theme = [
-		'name' => 'AdminLTE3',
+		'name' => 'Bootstrap4',
 		'body-sm' => false,
 		'navbar'  => [
 		'bg'     => 'gray',
@@ -56,7 +48,7 @@ class Basics extends BaseConfig {
 		],
 	],
 		'sidebar' => [
-		'type'    => 'dark',
+		'type'    => 'light',
 		'shadow'  => 4,
 		'border'  => false,
 		'compact' => true,

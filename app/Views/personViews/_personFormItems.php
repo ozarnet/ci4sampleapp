@@ -1,7 +1,8 @@
-		<div class="row">
-			<div class="col-md-6 pl-4 pr-4">
+        <div class="row">
+            <div class="col-sm-6 pl-4 pr-4">
 
 				<div class="form-group row">
+
 					<label for="firstName" class="col-md-4 col-form-label">
 						First Name*
 					</label>
@@ -11,6 +12,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="middleName" class="col-md-4 col-form-label">
 						Middle Name
 					</label>
@@ -20,6 +22,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="lastName" class="col-md-4 col-form-label">
 						Last Name*
 					</label>
@@ -29,28 +32,34 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="sex" class="col-md-4 col-form-label">
 						Gender
 					</label>
 					<div class="col-md-8">
 
-						<div class="form-check">
+    <div class="form-check">
 							<label for="f" class="form-check-label">
 								<input type="radio" id="f" name="sex" value="F" class="form-check-input" <?= $person->sex == 'F' ? 'checked' : '' ?>>
 								Female
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
 
-						<div class="form-check">
+
+
+    <div class="form-check">
 							<label for="m" class="form-check-label">
 								<input type="radio" id="m" name="sex" value="M" class="form-check-input" <?= $person->sex == 'M' ? 'checked' : '' ?>>
 								Male
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
+
+
 					</div><!--//.col -->
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="phoneNumber" class="col-md-4 col-form-label">
 						Phone Number
 					</label>
@@ -60,6 +69,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="emailAddress" class="col-md-4 col-form-label">
 						Email Address
 					</label>
@@ -69,6 +79,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="birthDate" class="col-md-4 col-form-label">
 						Birth Date
 					</label>
@@ -76,10 +87,11 @@
 						<input type="date" id="birthDate" name="birth_date" maxLength="10" class="form-control" value="<?=old('birth_date', $person->birth_date) ?>">
 					</div><!--//.col -->
 				</div><!--//.form-group -->
-			</div><!--//.col -->
-			<div class="col-md-6 pl-4 pr-4">
+            </div><!--//.col -->
+            <div class="col-sm-6 pl-4 pr-4">
 
 				<div class="form-group row">
+
 					<label for="cityId" class="col-md-4 col-form-label">
 						City
 					</label>
@@ -97,49 +109,61 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="personType" class="col-md-4 col-form-label">
 						Contact Type
 					</label>
 					<div class="col-md-8">
 
-						<div class="form-check">
+    <div class="form-check">
 							<label for="unspecified" class="form-check-label">
 								<input type="radio" id="unspecified" name="person_type" value="unspecified" class="form-check-input" <?= $person->person_type == 'unspecified' ? 'checked' : '' ?>>
 								unspecified
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
 
-						<div class="form-check">
+
+
+    <div class="form-check">
 							<label for="colleague" class="form-check-label">
 								<input type="radio" id="colleague" name="person_type" value="colleague" class="form-check-input" <?= $person->person_type == 'colleague' ? 'checked' : '' ?>>
 								colleague
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
 
-						<div class="form-check">
+
+
+    <div class="form-check">
 							<label for="employee" class="form-check-label">
 								<input type="radio" id="employee" name="person_type" value="employee" class="form-check-input" <?= $person->person_type == 'employee' ? 'checked' : '' ?>>
 								employee
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
 
-						<div class="form-check">
+
+
+    <div class="form-check">
 							<label for="customer" class="form-check-label">
 								<input type="radio" id="customer" name="person_type" value="customer" class="form-check-input" <?= $person->person_type == 'customer' ? 'checked' : '' ?>>
 								customer
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
 
-						<div class="form-check">
+
+
+    <div class="form-check">
 							<label for="friend" class="form-check-label">
 								<input type="radio" id="friend" name="person_type" value="friend" class="form-check-input" <?= $person->person_type == 'friend' ? 'checked' : '' ?>>
 								friend
 							</label>
-						</div><!--//.form-check -->
+    </div><!--//.form-check -->
+
+
 					</div><!--//.col -->
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="notes" class="col-md-4 col-form-label">
 						Notes
 					</label>
@@ -149,6 +173,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<div class="offset-md-4 col-md-8">
 						<div class="form-check">
 
@@ -162,6 +187,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<label for="score" class="col-md-4 col-form-label">
 						Score
 					</label>
@@ -169,6 +195,6 @@
 						<input type="range" id="score" name="score" maxLength="5" class="form-control" value="<?=old('score', $person->score) ?>">
 					</div><!--//.col -->
 				</div><!--//.form-group -->
-			</div><!--//.col -->
+            </div><!--//.col -->
 
-		</div><!-- //.row -->
+        </div><!-- //.row -->

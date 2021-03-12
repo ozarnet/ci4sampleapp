@@ -33,10 +33,6 @@ $routes->setAutoRoute(true);
 $routes->get('/', 'Home::index');
 
 // Additional in-file definitions
-$routes->get('cities/add', 'CitiesController::add', ['as' => 'newCity']);
-$routes->post('cities/add', 'CitiesController::add', ['as' => 'createCity']);
-$routes->resource('cities', ['namespace'  => 'App\Controllers', 'controller' => 'CitiesController']);
-$routes->post('cities/(:any)/edit', 'CitiesController::edit/$1', ['as' => 'updateCity']);
 $routes->get('countries', 'CountriesController::index', ['as' => 'countries']);
 $routes->get('countries/index', 'CountriesController::index', ['as' => 'countryIndex']);
 $routes->get('countries/list', 'CountriesController::index', ['as' => 'countryList']);
@@ -45,6 +41,10 @@ $routes->post('countries/add', 'CountriesController::add', ['as' => 'createCount
 $routes->get('countries/edit/(:any)', 'CountriesController::edit/$1', ['as' => 'editCountry']);
 $routes->post('countries/edit/(:any)', 'CountriesController::edit/$1', ['as' => 'updateCountry']);
 $routes->get('countries/delete/(:any)', 'CountriesController::delete/$1', ['as' => 'deleteCountry']);
+$routes->get('cities/add', 'CitiesController::add', ['as' => 'newCity']);
+$routes->post('cities/add', 'CitiesController::add', ['as' => 'createCity']);
+$routes->resource('cities', ['namespace'  => 'App\Controllers', 'controller' => 'CitiesController']);
+$routes->post('cities/(:any)/edit', 'CitiesController::edit/$1', ['as' => 'updateCity']);
 $routes->get('people', 'PeopleController::index', ['as' => 'people']);
 $routes->get('people/index', 'PeopleController::index', ['as' => 'personIndex']);
 $routes->get('people/list', 'PeopleController::index', ['as' => 'personList']);

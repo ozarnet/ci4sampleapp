@@ -1,7 +1,8 @@
-		<div class="row">
-			<div class="col-md-6 pl-4 pr-4">
+        <div class="row">
+            <div class="col-sm-6 pl-4 pr-4">
 
 				<div class="form-group row">
+
 					<label for="cityName" class="col-md-4 col-form-label">
 						City Name*
 					</label>
@@ -11,6 +12,7 @@
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
+
 					<div class="offset-md-4 col-md-8">
 						<div class="form-check">
 
@@ -22,10 +24,11 @@
 					</div>
 
 				</div><!--//.form-group -->
-			</div><!--//.col -->
-			<div class="col-md-6 pl-4 pr-4">
+            </div><!--//.col -->
+            <div class="col-sm-6 pl-4 pr-4">
 
 				<div class="form-group row">
+
 					<label for="countryCode" class="col-md-4 col-form-label">
 						Country
 					</label>
@@ -41,6 +44,6 @@
 						</select>
 					</div><!--//.col -->
 				</div><!--//.form-group -->
-			</div><!--//.col -->
+            </div><!--//.col -->
 
-		</div><!-- //.row -->
+        </div><!-- //.row -->
