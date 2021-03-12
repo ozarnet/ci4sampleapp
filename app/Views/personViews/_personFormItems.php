@@ -110,6 +110,16 @@
 
 				<div class="form-group row">
 
+					<label for="notes" class="col-md-4 col-form-label">
+						Notes
+					</label>
+					<div class="col-md-8">
+						<textarea rows="3" id="notes" name="notes" class="form-control"><?=old('notes', $person->notes) ?></textarea>
+					</div><!--//.col -->
+				</div><!--//.form-group -->
+
+				<div class="form-group row">
+
 					<label for="personType" class="col-md-4 col-form-label">
 						Contact Type
 					</label>
@@ -159,16 +169,6 @@
     </div><!--//.form-check -->
 
 
-					</div><!--//.col -->
-				</div><!--//.form-group -->
-
-				<div class="form-group row">
-
-					<label for="notes" class="col-md-4 col-form-label">
-						Notes
-					</label>
-					<div class="col-md-8">
-						<textarea rows="3" id="notes" name="notes" class="form-control"><?=old('notes', $person->notes) ?></textarea>
 					</div><!--//.col -->
 				</div><!--//.form-group -->
 

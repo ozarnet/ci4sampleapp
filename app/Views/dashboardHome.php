@@ -12,7 +12,7 @@
 					<p>Total Countries</p>
 				</div>
 				<div class="icon">
-					<i class="fas fa-star-of-life"></i>
+					<i class="far fa-bookmark"></i>
 				</div>
 				<?= anchor(route_to('countries'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 
@@ -27,7 +27,7 @@
 					<p>Total Cities</p>
 				</div>
 				<div class="icon">
-					<i class="fas fa-star-of-life"></i>
+					<i class="fas fa-globe"></i>
 				</div>
 				<?= anchor(route_to('cities'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 
@@ -42,7 +42,7 @@
 					<p>Total People</p>
 				</div>
 				<div class="icon">
-					<i class="fas fa-star-of-life"></i>
+					<i class="fas fa-chart-bar"></i>
 				</div>
 				<?= anchor(route_to('people'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 

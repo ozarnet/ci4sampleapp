@@ -1,9 +1,9 @@
 <?php  namespace App\Controllers;
 
 
-use App\Models\CityModel;
-
 use App\Models\PersonModel;
+
+use App\Models\CityModel;
 use App\Entities\Person;
 
 class PeopleController extends GoBaseController { 
@@ -22,16 +22,16 @@ class PeopleController extends GoBaseController {
     protected $indexRoute = 'people';
 
     protected $formValidationRules = [
-		'phone_number' => 'trim|max_length[20]',
-		'birth_date' => 'valid_date|permit_empty',
 		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
-		'middle_name' => 'trim|max_length[40]',
-		'first_name' => 'trim|required|max_length[40]',
-		'person_type' => 'max_length[31]',
 		'last_name' => 'trim|required|max_length[50]',
 		'sex' => 'trim',
+		'middle_name' => 'trim|max_length[40]',
 		'notes' => 'trim|max_length[16313]',
 		'score' => 'decimal|permit_empty',
+		'first_name' => 'trim|required|max_length[40]',
+		'person_type' => 'max_length[31]',
+		'phone_number' => 'trim|max_length[20]',
+		'birth_date' => 'valid_date|permit_empty',
 		];
 
     public function index() {
@@ -119,8 +119,8 @@ class PeopleController extends GoBaseController {
         
         $this->viewData['person'] = $person ?? new Person();
 		$this->viewData['cityList'] = $this->getCityListItems();
-		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
 		$this->viewData['sexList'] = $this->getSexOptions();
+		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
 
 
         $this->viewData['formAction'] = route_to('createPerson');
@@ -199,8 +199,8 @@ class PeopleController extends GoBaseController {
 
         $this->viewData['person'] = $person;
 		$this->viewData['cityList'] = $this->getCityListItems();
-		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
 		$this->viewData['sexList'] = $this->getSexOptions();
+		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
 
         
         $theId = $id;
@@ -220,6 +220,17 @@ class PeopleController extends GoBaseController {
 
 
 
+	protected function getSexOptions() { 
+		$sexOptions = [ 
+				'' => 'Please select...',
+				'F' => 'Female',
+				'M' => 'Male',
+			];
+		return $sexOptions;
+	}
+
+
+
 	protected function getPersonTypeOptions() { 
 		$personTypeOptions = [ 
 				'' => 'Please select...',
@@ -230,17 +241,6 @@ class PeopleController extends GoBaseController {
 				'friend' => 'friend',
 			];
 		return $personTypeOptions;
-	}
-
-
-
-	protected function getSexOptions() { 
-		$sexOptions = [ 
-				'' => 'Please select...',
-				'F' => 'Female',
-				'M' => 'Male',
-			];
-		return $sexOptions;
 	}
 
 
