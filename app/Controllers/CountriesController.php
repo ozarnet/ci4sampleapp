@@ -20,8 +20,8 @@ class CountriesController extends GoBaseController {
     protected $indexRoute = 'countries';
 
     protected $formValidationRules = [
-		'iso_code' => 'trim|required|max_length[2]',
 		'country_name' => 'trim|required|max_length[60]',
+		'iso_code' => 'trim|required|max_length[2]',
 		];
 
     public function index() {

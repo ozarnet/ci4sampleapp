@@ -3,11 +3,11 @@
     /*
         The MIT License (MIT)
 
-        Copyright (c) 2020 Gökhan Ozar (https://gokhan.ozar.net/)
+        Copyright (c) 2020 Ozar (https://www.ozar.net/)
         Copyright (c) 2014-2019 British Columbia Institute of Technology (https://www.bcit.ca)
         Copyright (c) 2019-2020 CodeIgniter Foundation (https://www.codeigniter.com)
         Copyright (c) 2014-2020 ColorlibHQ (https://adminlte.io)
-        Copyright (c) 2019-2020 Agung Sugiarto  for portions of this code (https://agungsugiarto.github.io)
+        Copyright (c) 2019-2020 Agung Sugiarto for portions of this code (https://agungsugiarto.github.io)
 
 
         Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), 
@@ -30,15 +30,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta http-equiv="x-ua-compatible" content="ie=edge">
     <?php if ( ENVIRONMENT=='production') : ?>
     <meta name="<?= csrf_token() ?>" content="<?= csrf_hash() ?>">
     <?php endif; ?>
     <title><?= isset($pageTitle) ? $pageTitle . ' | ': '' ?><?= config('Basics')->appName ?></title>
     
+    <link rel="dns-prefetch" href="//cdn.jsdelivr.net">    
+
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5.12.0/css/all.min.css">
     <!-- Google Font: Source Sans Pro -->
+    <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
     <!-- Sweetalert -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@9.7.2/dist/sweetalert2.min.css">
@@ -94,7 +96,7 @@
         <!-- To the right -->
         <div class="float-right d-none d-sm-inline">
             <?= config('Basics')->appName ?>  created with 
-            <a href="https://www.ozar.net/products/codeigniterwizard/?ref=gh"><strong>CodeIgniter Wizard</strong> Mac App</a>
+            <a href="https://www.ozar.net/products/codeigniterwizard/?r=usrwebapp"><strong>CodeIgniter Wizard</strong> Mac App</a>
         </div>
     </footer>
 </div>
@@ -105,58 +107,22 @@
 <!-- REQUIRED SCRIPTS -->
 
 <!-- jQuery -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js" integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0=" crossorigin="anonymous" defer></script>
 <!-- Bootstrap 4 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.4.1/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-Piv4xVNRyMGpqkS2by6br4gNJ7DXjqk09RmUpJ8jgGtD7zP9yug3goQfGII0yAns" crossorigin="anonymous" defer></script>
 <!-- AdminLTE App -->
-<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.0.4/dist/js/adminlte.min.js"></script>
-<!-- Preload Script -->
-<script>
-    $('.sidebar-toggle').on('click',function(event){event.preventDefault();if(Boolean(sessionStorage.getItem('sidebar-toggle-collapsed'))){sessionStorage.setItem('sidebar-toggle-collapsed','')}else{sessionStorage.setItem('sidebar-toggle-collapsed','1')}});(function(){if(Boolean(sessionStorage.getItem('sidebar-toggle-collapsed'))){var body=document.getElementsByTagName('body')[0];body.className=body.className+' sidebar-collapse'}})()
-</script>
+<script src="https://cdn.jsdelivr.net/npm/admin-lte@3.0.4/dist/js/adminlte.min.js" defer></script>
 
-<script>
-    $.ajaxSetup({headers:{'<?= config('App')->CSRFHeaderName ?>':$('meta[name="<?= config('App')->CSRFTokenName ?>"]').attr('content')}})
+<!-- Preload Script -->
+<script type="module">
+    document.addEventListener('DOMContentLoaded', function() {
+        $('.sidebar-toggle').on('click',function(event){event.preventDefault();if(Boolean(sessionStorage.getItem('sidebar-toggle-collapsed'))){sessionStorage.setItem('sidebar-toggle-collapsed','')}else{sessionStorage.setItem('sidebar-toggle-collapsed','1')}});(function(){if(Boolean(sessionStorage.getItem('sidebar-toggle-collapsed'))){var body=document.getElementsByTagName('body')[0];body.className=body.className+' sidebar-collapse'}})();
+        $.ajaxSetup({headers:{'<?= config('App')->CSRFHeaderName ?>':$('meta[name="<?= config('App')->CSRFTokenName ?>"]').attr('content')}});
+    });
 </script>
 
 <!-- Render section boilerplate js -->
 <?= $this->renderSection('js') ?>
-<!-- Sweeat alert -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9.7.2/dist/sweetalert2.all.min.js"></script>
-<script>
-    const Toast = Swal.mixin({
-        toast: true,
-        position: 'top-end',
-        showConfirmButton: false,
-        timer: 3000,
-        timerProgressBar: true,
-        onOpen: (toast) => {
-            toast.addEventListener('mouseenter', Swal.stopTimer)
-            toast.addEventListener('mouseleave', Swal.resumeTimer)
-        }
-    });
-
-    <?php if (session('sweet-success')) { ?>
-    Toast.fire({
-        icon: 'success',
-        title: '<?= session('sweet-success.') ?>'
-    });
-    <?php } ?>
-    <?php if (session('sweet-warning')) { ?>
-    Toast.fire({
-        icon: 'warning',
-        title: '<?= session('sweet-warning.') ?>'
-    });
-    <?php } ?>
-    <?php if (session('sweet-error')) { ?>
-    Toast.fire({
-        icon: 'error',
-        title: '<?= session('sweet-error.') ?>'
-    });
-    <?php } ?>
-</script>
-
-<?php // echo $this->include('codeIgniter4DebugFooter'); ?>
 
 
 </body>

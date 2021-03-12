@@ -7,13 +7,10 @@
             <a class="nav-link" data-widget="pushmenu" href="#"><i class="fas fa-bars"></i></a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="<?= route_to('/') ?>" class="nav-link">Dashboard Home</a>
+            <a href="<?= route_to('/') ?>" class="nav-link">Home</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="https://www.ozar.net/products/codeigniterwizard/?ref=gh" class="nav-link">CodeIgniter Wizard </a>
-        </li>
-        <li class="nav-item d-none d-sm-inline-block">
-            <a href="https://www.ozar.net/products/codeigniterwizard/sample/?ref=gh" class="nav-link">About This App</a>
+            <a href="https://www.ozar.net/products/codeigniterwizard/?r=uap" class="nav-link">About</a>
         </li>
     </ul>
 

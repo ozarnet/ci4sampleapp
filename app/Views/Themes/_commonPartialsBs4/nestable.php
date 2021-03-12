@@ -7,5 +7,5 @@
 
 <!-- Push section js -->
 <?= $this->section('js') ?>
-<script src="https://cdn.jsdelivr.net/npm/nestable2@1.6.0/dist/jquery.nestable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/nestable2@1.6.0/dist/jquery.nestable.min.js" defer></script>
 <?= $this->endSection() ?>
