@@ -24,12 +24,16 @@ An SQL dump of the database is present at the root of the project. The current v
 [On YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
 
 ## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
+
 ### Installing Homebrew on macOS Big Sur
 [![Installing Homebrew on macOS Big Sur](https://img.youtube.com/vi/_n2YexLCN8c/0.jpg)](https://www.youtube.com/watch?v=_n2YexLCN8c)
-[On YouTube](https://www.youtube.com/watch?v=_n2YexLCN8c)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=_n2YexLCN8c)
+
 ### Installing PHP 8 via Homebrew on macOS Big Sur
 [![Installing PHP 8 via Homebrew on macOS Big Sur](https://img.youtube.com/vi/UK7zPZlUkZg/0.jpg)](https://www.youtube.com/watch?v=UK7zPZlUkZg)
-[On YouTube](https://www.youtube.com/watch?v=UK7zPZlUkZg)
+
+[Watch on YouTube](https://www.youtube.com/watch?v=UK7zPZlUkZg)
 
 ### Database E-R Diagram
 ![Database E-R Diagram](NavicatModelScreenshot.png)
