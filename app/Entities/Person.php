@@ -14,17 +14,15 @@ class Person extends GoBaseEntity
 			'city_id' => null,
 			'person_type' => null,
 			'birth_date' => null,
-			'is_friend' => false,
 			'notes' => null,
-			'enabled' => false,
+			'enabled' => 0,
 			'score' => null,
 			'created_at' => null,
 			'updated_at' => null,
 		];
 	protected $casts = [
 			'city_id' => '?int',
-			'is_friend' => 'boolean',
-			'enabled' => 'boolean',
+			'enabled' => 'int',
 			'score' => '?float',
 		]; 
 }

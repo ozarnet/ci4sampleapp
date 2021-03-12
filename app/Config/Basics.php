@@ -5,7 +5,7 @@
     The MIT License (MIT)
 
     Copyright (c) 2019-2020 Agung Sugiarto (https://agungsugiarto.github.io)
-    Copyright (c) 2014-2020 ColorlibHQ (https://adminlte.io)
+    
     Copyright (c) 2020 Gökhan Ozar (https://gokhan.ozar.net/)
 
     Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"),
@@ -26,11 +26,12 @@ use CodeIgniter\Config\BaseConfig;
 
 class Basics extends BaseConfig {
 
-	public $appName = 'Country City Person DB';
+	public $appName = 'Countries Cities People';
 
 	public $i18n = 'English'; 
 
 	public $authImplemented = false;
+
 
 //--------------------------------------------------------------------------
 // Theme options
@@ -46,8 +47,8 @@ class Basics extends BaseConfig {
 		'name' => 'AdminLTE3',
 		'body-sm' => false,
 		'navbar'  => [
-		'bg'     => 'white',
-		'type'   => 'light',
+		'bg'     => 'gray',
+		'type'   => 'dark',
 		'border' => true,
 		'user'   => [
 		'visible' => true,
@@ -67,7 +68,7 @@ class Basics extends BaseConfig {
 		'bg'   => 'gray-dark',
 		'logo' => [
 		'icon'   => 'favicon.ico', // path to image | this example icon on public root folder.
-		'text'   => 'CountryCityPersonDB',
+		'text'   => 'Countries Cities People',
 		'shadow' => 2,
 		],
 	],
@@ -78,8 +79,8 @@ class Basics extends BaseConfig {
 	],
 		'footer' => [
 		'fixed'      => false,
-		'organization' => 'Ozar.net',
-		'orglink' => 'https://www.ozar.net/?ref=gh',
+		'organization' => 'Ozar',
+		'orglink' => 'https://www.ozar.net',
 		],
 	];
 

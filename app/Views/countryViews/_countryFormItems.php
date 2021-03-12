@@ -1,12 +1,13 @@
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-6 pl-4 pr-4">
 
 				<div class="form-group row">
 					<label for="isoCode" class="col-md-4 col-form-label">
-						ISO Code
+						ISO Code*
 					</label>
-					<div class="col-md-7">
-						<input type="text" id="isoCode" name="iso_code" required maxLentgh="2" class="form-control" value="<?=(!empty(set_value('iso_code')) ? set_value('iso_code') : $country->iso_code) ?>">					</div><!--//.col -->
+					<div class="col-md-8">
+						<input type="text" id="isoCode" name="iso_code" required maxLength="2" class="form-control" value="<?=old('iso_code', $country->iso_code) ?>">
+					</div><!--//.col -->
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
@@ -22,14 +23,15 @@
 
 				</div><!--//.form-group -->
 			</div><!--//.col -->
-			<div class="col-md-6">
+			<div class="col-md-6 pl-4 pr-4">
 
 				<div class="form-group row">
 					<label for="countryName" class="col-md-4 col-form-label">
-						Country Name
+						Country Name*
 					</label>
-					<div class="col-md-7">
-						<input type="text" id="countryName" name="country_name" required maxLentgh="60" class="form-control" value="<?=(!empty(set_value('country_name')) ? set_value('country_name') : $country->country_name) ?>">					</div><!--//.col -->
+					<div class="col-md-8">
+						<input type="text" id="countryName" name="country_name" required maxLength="60" class="form-control" value="<?=old('country_name', $country->country_name) ?>">
+					</div><!--//.col -->
 				</div><!--//.form-group -->
 			</div><!--//.col -->
 

@@ -15,6 +15,12 @@ class CountryModel extends GoBaseModel
 		];
 	protected $returnType = 'App\Entities\Country';
 
+	protected $useTimestamps = true;
+
+	protected $updatedField  = 'updated_at';
+
+	protected $createdField  = null;
+
 	public static $labelField = 'country_name';
  
 }

@@ -6,11 +6,10 @@
 
 <!-- Push section js -->
 <?= $this->section('js') ?>
-    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js"></script>
-    <script>
-        $(function () {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.full.min.js" defer></script>
+    <script type="module">
+        $(document).ready(function() {
             $('.select2bs').select2({
-                theme: 'bootstrap4',
                 allowClear: false,
             });
         });

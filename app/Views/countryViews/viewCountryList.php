@@ -6,7 +6,7 @@
 
 		<div class="card card-info">
 			<div class="card-header">
-				<h3 class="card-title">Countries</h3>
+				<h3 class="card-title">Country List</h3>
 				<div class="card-tools">
 					<button type="button" class="btn btn-tool" data-card-widget="collapse" data-toggle="tooltip" title="Collapse">
 						<i class="fas fa-minus"></i>
@@ -22,13 +22,14 @@
 			<div class="card-body">
 				<?= view('Themes/_commonPartials/_alertBoxes'); ?>
 
-					<table id="tableOfcountries" class="table table-striped table-hover using-data-table">
+					<table id="tableOfCountries" class="table table-striped table-hover using-data-table">
 						<thead>
 							<tr>
 								<th class="text-nowrap">Action</th>
 								<th>ISO Code</th>
 								<th>Country Name</th>
 								<th>Active</th>
+								<th>Updated At</th>
 								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>
@@ -36,14 +37,14 @@
 						<?php foreach ($countryList as $item ) : ?>
 							<tr>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('editCountry', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>"><i class="fas fa-edit"></i></a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCountry', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
+									<?=anchor(route_to('editCountry', $item->iso_code), '<i class="fas fa-pencil-alt"></i>', ['class'=>'btn btn-sm btn-warning mr-1', 'data-id'=>$item->iso_code]); ?> 
+									<?=anchor('#confirm2delete', '<i class="fas fa-trash"></i>', ['class'=>'btn btn-sm btn-danger ml-1', 'data-href'=>route_to('deleteCountry', $item->iso_code), 'data-toggle'=>'modal', 'data-target'=>'#confirm2delete']); ?>
 								</td>
 								<td class="align-middle text-center">
 									<?=$item->iso_code ?>
 								</td>
 								<td class="align-middle">
-									<?=$item->country_name ?>
+									<?= strlen($item->country_name) < 51 ? esc($item->country_name) : character_limiter(esc($item->country_name), 50)   ?>
 								</td>
 								<td class="align-middle text-center text-green">
 
@@ -54,9 +55,12 @@
 								<?php  }  ?>
 
 								</td>
+								<td class="align-middle text-nowrap">
+									<?= empty($item->updated_at) ? '' : date('j F Y H:i', strtotime($item->updated_at))  ?>
+								</td>
 								<td class="align-middle text-center text-nowrap">
-									<a href="<?=route_to('editCountry', $item->iso_code) ?>" class="btn btn-sm btn-warning mr-1" data-id="<?=$item->iso_code ?>"><i class="fas fa-edit"></i></a>
-									<a href="#confirm2delete" class="btn btn-sm btn-danger ml-1" data-href="<?=route_to('deleteCountry', $item->iso_code) ?>" data-toggle="modal" data-target="#confirm2delete"><i class="fas fa-times"></i></a>
+									<?=anchor(route_to('editCountry', $item->iso_code), '<i class="fas fa-pencil-alt"></i>', ['class'=>'btn btn-sm btn-warning mr-1', 'data-id'=>$item->iso_code]); ?> 
+									<?=anchor('#confirm2delete', '<i class="fas fa-trash"></i>', ['class'=>'btn btn-sm btn-danger ml-1', 'data-href'=>route_to('deleteCountry', $item->iso_code), 'data-toggle'=>'modal', 'data-target'=>'#confirm2delete']); ?>
 								</td>
 							</tr>
 
@@ -65,9 +69,7 @@
 					</table>
 			</div><!--//.card-body -->
 			<div class="card-footer">
-				<a href="<?=route_to('newCountry') ?>" class="btn btn-primary">
-				Add a New Country
-		</a>
+				<?=anchor(route_to('newCountry'), 'Add a New Country', ['class'=>'btn btn-primary']); ?>
 			</div><!--//.card-footer -->
 		</div><!--//.card -->
 	</div><!--//.col -->

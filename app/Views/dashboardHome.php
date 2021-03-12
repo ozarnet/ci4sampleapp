@@ -12,9 +12,10 @@
 					<p>Total Countries</p>
 				</div>
 				<div class="icon">
-					<i class="ion ion-stats-bars"></i>
+					<i class="fas fa-chart-bar"></i>
 				</div>
-				<a href="<?=route_to('App\Controllers\Countries::index') ?>" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+				<?= anchor(route_to('countries'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+
 			</div><!-- /.small-box -->
 
 		</div><!-- /.col -->
@@ -26,9 +27,10 @@
 					<p>Total Cities</p>
 				</div>
 				<div class="icon">
-					<i class="ion ion-stats-bars"></i>
+					<i class="far fa-question-circle"></i>
 				</div>
-				<a href="<?=route_to('App\Controllers\Cities::index') ?>" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+				<?= anchor(route_to('cities'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+
 			</div><!-- /.small-box -->
 
 		</div><!-- /.col -->
@@ -40,9 +42,10 @@
 					<p>Total People</p>
 				</div>
 				<div class="icon">
-					<i class="ion ion-stats-bars"></i>
+					<i class="far fa-bookmark"></i>
 				</div>
-				<a href="<?=route_to('App\Controllers\People::index') ?>" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+				<?= anchor(route_to('people'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+
 			</div><!-- /.small-box -->
 
 		</div><!-- /.col -->

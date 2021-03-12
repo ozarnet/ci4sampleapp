@@ -1,12 +1,13 @@
 		<div class="row">
-			<div class="col-md-6">
+			<div class="col-md-6 pl-4 pr-4">
 
 				<div class="form-group row">
 					<label for="cityName" class="col-md-4 col-form-label">
-						City Name
+						City Name*
 					</label>
-					<div class="col-md-7">
-						<input type="text" id="cityName" name="city_name" required maxLentgh="60" class="form-control" value="<?=(!empty(set_value('city_name')) ? set_value('city_name') : $city->city_name) ?>">					</div><!--//.col -->
+					<div class="col-md-8">
+						<input type="text" id="cityName" name="city_name" required maxLength="60" class="form-control" value="<?=old('city_name', $city->city_name) ?>">
+					</div><!--//.col -->
 				</div><!--//.form-group -->
 
 				<div class="form-group row">
@@ -22,23 +23,23 @@
 
 				</div><!--//.form-group -->
 			</div><!--//.col -->
-			<div class="col-md-6">
+			<div class="col-md-6 pl-4 pr-4">
 
 				<div class="form-group row">
 					<label for="countryCode" class="col-md-4 col-form-label">
 						Country
 					</label>
-					<div class="col-md-7">
-						<select id="countryCode" name="country_code" class="form-control select2bs">
+					<div class="col-md-8">
+						<select id="countryCode" name="country_code" class="form-control select2bs" style="width: 100%;" >
+							<option value="">Please select a country...</option>
 
-							<option value="" selected="selected">Please select a country...</option>
 							<?php foreach($countryList as $item) : ?>
 							<option value="<?=$item->iso_code ?>"<?=$item->iso_code==$city->country_code ? ' selected':'' ?>>
 								<?=$item->country_name ?>
 							</option>
 							<?php endforeach; ?>
 						</select>
-						</div><!--//.col -->
+					</div><!--//.col -->
 				</div><!--//.form-group -->
 			</div><!--//.col -->
 

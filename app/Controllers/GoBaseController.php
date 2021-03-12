@@ -115,7 +115,7 @@ abstract class GoBaseController extends Controller {
      *
      * @var array
      */
-    protected $helpers = ['session', 'go_common']; // $helpers = ['session', 'url', 'go_common'];
+    protected $helpers = ['session', 'go_common']; 
 
     public static $queries = [];
 
@@ -132,6 +132,10 @@ abstract class GoBaseController extends Controller {
         // E.g.:
         $this->session = \Config\Services::session();
 
+        if ((!isset($this->viewData['pageTitle']) || empty($this->viewData['pageTitle']) ) && isset(static::$pluralObjectName) && !empty(static::$pluralObjectName)) {
+            $this->viewData['pageTitle'] = ucfirst(static::$pluralObjectName);
+        }
+
         if ($this->usePageSubTitle) {
             $this->pageSubTitle = config('Basics')->appName;
             $this->viewData['pageSubTitle'] = ' in '.$this->pageSubTitle;
@@ -139,12 +143,13 @@ abstract class GoBaseController extends Controller {
         $this->viewData['errorMessage'] = $this->session->getFlashdata('errorMessage');
         $this->viewData['successMessage'] = $this->session->getFlashdata('successMessage');
 
-        if (empty(static::$pluralObjectName)) {
+        if (empty(static::$controllerSlug)) {
             $reflect = new \ReflectionClass($this);
             $className = $reflect->getShortName();
-            $this->viewData['currentModule'] = str_replace('Controller','',$className);
+            $this->viewData['currentModule'] = slugify(convertToSnakeCase(str_replace('Controller','',$className)));
+
         } else {
-            $this->viewData['currentModule'] = ucfirst(strtolower(static::$pluralObjectNameCc));
+            $this->viewData['currentModule'] = strtolower(static::$controllerSlug);
         }
 
         $this->viewData['viewPath'] = static::$viewPath;
@@ -157,8 +162,10 @@ abstract class GoBaseController extends Controller {
 
     public function index() {
 
-        if ((!isset($this->viewData['pageTitle']) || empty($this->viewData['pageTitle']) ) && isset(static::$pluralObjectName) && !empty(static::$pluralObjectName)) {
-            $this->viewData['pageTitle'] = ucfirst(static::$pluralObjectName);
+        helper('text');
+
+        if ((!isset($this->viewData['boxTitle']) || empty($this->viewData['boxTitle']) ) && isset(static::$pluralObjectName) && !empty(static::$pluralObjectName)) {
+            $this->viewData['boxTitle'] = ucfirst(static::$pluralObjectName);
         }
 
         if (isset($this->primaryModel) && isset(static::$singularObjectNameCc) && !empty(static::$singularObjectNameCc) && !isset($this->viewData[(static::$singularObjectNameCc) . 'List'])) {
@@ -173,22 +180,6 @@ abstract class GoBaseController extends Controller {
         $viewFilePath = static::$viewPath . (empty($this->currentView) ? 'view' . ucfirst(static::$singularObjectNameCc) . 'List' : $this->currentView);
         // var_dump($viewFilePath);
         echo view($viewFilePath, $this->viewData);
-    }
-
-    protected function redirect2listView($flashDataKey = null, $flashDataValue = null) {
-
-        if ($this->viewData['currentModule']) {
-            $uri = '/' . strtolower($this->viewData['currentModule']);
-        } elseif (isset(static::$pluralObjectNameSc) && !empty(static::$pluralObjectNameSc)) {
-            $uri = '/' . static::$controllerPath . static::$pluralObjectNameSc;
-        } else {
-            $uri = '/';
-        }
-        if ($flashDataKey != null && $flashDataValue != null) {
-            return redirect()->to($uri)->with($flashDataKey, $flashDataValue);
-        } else {
-            return redirect()->to($uri);
-        }
     }
 
     protected function displayForm($forMethod, $objId = null) {
@@ -216,13 +207,54 @@ abstract class GoBaseController extends Controller {
             $this->viewData['formAction'] = base_url(strtolower($this->viewData['currentModule'])  . '/' . $action . '/' . $formActionSuffix);
         }
 
-        $this->viewData['pageTitle'] = ucfirst($action) . $actionSuffix . ucfirst(static::$singularObjectName);
+        if ((!isset($this->viewData['boxTitle']) || empty($this->viewData['boxTitle']) ) && isset(static::$singularObjectName) && !empty(static::$singularObjectName)) {
+            $this->viewData['boxTitle'] = ucfirst($action) . $actionSuffix . ucfirst(static::$singularObjectName);
+        }
         
         $this->viewData['validation'] = $validation;
 
         $viewFilePath = static::$viewPath . 'view' . ucfirst(static::$singularObjectNameCc) . 'Form';
 
         echo view($viewFilePath, $this->viewData);
+    }
+
+    protected function redirect2listView($flashDataKey = null, $flashDataValue = null) {
+
+        if (!empty($this->indexRoute)) {
+            $uri = base_url(route_to($this->indexRoute));
+        } else {
+
+            $reflect = new \ReflectionClass($this);
+            $className = $reflect->getShortName();
+
+            $routes = \Config\Services::routes();
+            $routesOptions = $routes->getRoutesOptions();
+
+            if (!empty(static::$controllerSlug)) {
+
+                if (isset($routesOptions[static::$controllerSlug])) {
+                    $namedRoute = $routesOptions[static::$controllerSlug]['as'];
+                    $uri = route_to($namedRoute);
+                } else {
+                    $getHandlingRoutes = $routes->getRoutes('get');
+
+                    $indexMethod = array_search('\\App\\Controllers\\'.$className.'::index', $getHandlingRoutes);
+                    if ($indexMethod) {
+                        $uri = route_to('App\\Controllers\\'.$className.'::index');
+                    } else {
+                        $uri = base_url(static::$controllerSlug);
+                    }
+                }
+            } else {
+                $uri = base_url($className);
+            }
+        }
+        
+        if ($flashDataKey != null && $flashDataValue != null) {
+            return redirect()->to($uri)->with($flashDataKey, $flashDataValue);
+        } else {
+            return redirect()->to($uri);
+        }
     }
 
     public function delete($requestedId, bool $deletePermanently = true) {
@@ -258,7 +290,7 @@ abstract class GoBaseController extends Controller {
                 $rawResult = $this->primaryModel->update($id, ['deleted' => true]);
             endif;
             } catch (\Exception $e) {
-                log_message('error', "GO Exception: Error deleting object id $id :\r\n".$e->getMessage());
+                log_message('error', "Exception: Error deleting object named '".(static::$singularObjectName ?? 'unknown')."' with  $id :\r\n".$e->getMessage());
             }
         endif;
 
@@ -279,7 +311,7 @@ abstract class GoBaseController extends Controller {
             $message = 'The ' . static::$singularObjectName . ' was successfully deleted.';
             
             if ($result['affectedRows']>1) :
-                log_message('warning', "More than one row has been deleted in attempt to delete object id: $id");
+                log_message('warning', "More than one row has been deleted in attempt to delete row for object named '".(static::$singularObjectName ?? 'unknown')."' with id: $id");
             endif;
             return $this->redirect2listView('successMessage', $message);
         endif;
@@ -307,10 +339,11 @@ abstract class GoBaseController extends Controller {
             $valid = $this->validate($validationRules);
         }
 
+        /* // As of version 1.1.5 of CodeIgniter Wizard, the following is replaced by custom validation errors template supported by CodeIgniter 4 
         if (!$valid) {
-
             $this->viewData['errorMessage'] .= $validation->listErrors();
         }
+        */
         return $valid;
     }
 
