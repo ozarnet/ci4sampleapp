@@ -7,10 +7,10 @@ class City extends GoBaseEntity
 			'id' => null,
 			'city_name' => null,
 			'country_code' => null,
-			'enabled' => 0,
+			'enabled' => true,
 			'updated_at' => null,
 		];
 	protected $casts = [
-			'enabled' => 'int',
+			'enabled' => 'boolean',
 		]; 
 }
