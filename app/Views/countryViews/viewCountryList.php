@@ -18,7 +18,7 @@
 								<th>ISO Code</th>
 								<th>Country Name</th>
 								<th>Active</th>
-								<th>Updated At</th>
+								<th>Last Modified on</th>
 								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>

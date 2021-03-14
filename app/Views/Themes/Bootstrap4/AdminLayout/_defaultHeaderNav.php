@@ -11,7 +11,7 @@
                 <a class="nav-link" href="<?= route_to('/') ?>">Home <span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="https://www.ozar.net/products/codeigniterwizard/?r=uap">About</a>
+                <a class="nav-link" href="https://www.ozar.net/products/codeigniterwizard/sample/?r=uap411dm&layout=1&theme=bs4">About</a>
             </li>
         </ul>
 

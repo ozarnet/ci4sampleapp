@@ -1,4 +1,5 @@
 <?=$this->include('Themes/_commonPartialsBs4/datatables') ?>
+<?=$this->include('Themes/_commonPartialsBs4/sweetalert') ?>
 <?=$this->extend('Themes/'.config('Basics')->theme['name'].'/AdminLayout/defaultLayout') ?>
 <?=$this->section('content');  ?>
 <div class="row">
@@ -19,7 +20,7 @@
 								<th>City Name</th>
 								<th>Country</th>
 								<th>Active</th>
-								<th>Updated At</th>
+								<th>Last Modified on</th>
 								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>
@@ -110,6 +111,37 @@
                 });
             }
     });
+
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        onOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer)
+            toast.addEventListener('mouseleave', Swal.resumeTimer)
+        }
+    });
+
+    <?php if (session('sweet-success')) { ?>
+    Toast.fire({
+        icon: 'success',
+        title: '<?= session('sweet-success.') ?>'
+    });
+    <?php } ?>
+    <?php if (session('sweet-warning')) { ?>
+    Toast.fire({
+        icon: 'warning',
+        title: '<?= session('sweet-warning.') ?>'
+    });
+    <?php } ?>
+    <?php if (session('sweet-error')) { ?>
+    Toast.fire({
+        icon: 'error',
+        title: '<?= session('sweet-error.') ?>'
+    });
+    <?php } ?>
     
         $(document).on('click', '.btn-edit', function(e) {
         // ${$(this).attr('data-id')}

@@ -31,7 +31,7 @@ class CityModel extends GoBaseModel
 
 	public static $labelField = 'city_name';
 
-	public function findAllWithCountries(string $selcols='id, t1.city_name, t1.country_code, t1.enabled, t1.updated_at', int $limit=null, int $offset = 0) { 
+	public function findAllWithCountries(string $selcols='*', int $limit=null, int $offset = 0) { 
 		$sql = 'SELECT t1.'.$selcols.',  t2.country_name AS countries_country_name FROM ' . $this->table . ' t1  LEFT JOIN tbl_countries t2 ON t1.country_code = t2.iso_code'; 
 		if (!is_null($limit) && intval($limit) > 0) {
 			$sql .= ' LIMIT ' . intval($limit);

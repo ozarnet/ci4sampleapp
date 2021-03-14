@@ -172,13 +172,9 @@ abstract class GoBaseController extends Controller {
             $this->viewData[(static::$singularObjectNameCc) . 'List'] = $this->primaryModel->asObject()->findAll();
         }
 
-        if ($this->isBackEnd) {
-            $this->viewData['usingDataTables'] = true;
-        }
-
-        // if $this->currentView is assigned a view name, use it, otherwise assume the view something like 'view_singleobject_list'
+        // if $this->currentView is assigned a view name, use it, otherwise assume the view something like 'viewSingleObjectList'
         $viewFilePath = static::$viewPath . (empty($this->currentView) ? 'view' . ucfirst(static::$singularObjectNameCc) . 'List' : $this->currentView);
-        // var_dump($viewFilePath);
+    
         echo view($viewFilePath, $this->viewData);
     }
 
@@ -327,7 +323,7 @@ abstract class GoBaseController extends Controller {
             return true;
         }
         
-        $validationErrors = $this->formValidationErrors ?? null;;
+        $validationErrors = $this->formValidationErrors ?? null;
 
         $validation =  \Config\Services::validation();
         

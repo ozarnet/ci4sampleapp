@@ -1,10 +1,12 @@
-<?php  namespace App\Controllers;
+<?php
 
+namespace App\Controllers;
 
 use App\Models\CountryModel;
 use App\Entities\Country;
 
-class CountriesController extends GoBaseController { 
+class CountriesController extends GoBaseController
+{
 
     protected static $primaryModelName = 'CountryModel';
     protected static $singularObjectName = 'Country';
@@ -20,19 +22,20 @@ class CountriesController extends GoBaseController {
     protected $indexRoute = 'countries';
 
     protected $formValidationRules = [
-		'iso_code' => 'trim|required|max_length[2]',
-		'country_name' => 'trim|required|max_length[60]',
-		];
+        'country_name' => 'trim|required|max_length[60]',
+        'iso_code' => 'trim|required|max_length[2]',
+    ];
 
-    public function index() {
+    public function index()
+    {
 
-         $this->viewData['usingClientSideDataTable'] = true;
-         
-         parent::index();
+        $this->viewData['usingClientSideDataTable'] = true;
 
+        parent::index();
     }
 
-    public function add() {
+    public function add()
+    {
 
         $countryModel = $this->primaryModel; // = new CountryModel();
 
@@ -42,36 +45,47 @@ class CountriesController extends GoBaseController {
 
             $postData = $this->request->getPost();
             $sanitizedData = [];
-        
+
             foreach ($postData as $k => $v) :
                 $sanitizationResult = goSanitize($v);
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
 
             $country = new Country($sanitizedData);
-			$this->formValidationRules['country_name'] .= '|is_unique[tbl_countries.country_name]';
+            $this->formValidationRules['country_name'] .= '|is_unique[tbl_countries.country_name]';
+
+
+            $noException = true;
 
             $formValid = $this->canValidate();
-            
+
             if ($formValid) :
                 try {
                     $successfulResult = $countryModel->insert($country);
                 } catch (\Exception $e) {
+                    $noException = false;
                     $successfulResult = false;
-                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database :';
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
+                    $dbError = $this->primaryModel->db->error();
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new ' . static::$singularObjectName . ' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL . 'There is an existing ' . static::$singularObjectName . ' on our database with the same data.';
+                    endif;
                     $result['error'] = $userFriendlyErrMsg;
-                    $query = $countryModel->db->getLastQuery();
-                    log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
-                    $dbError = $countryModel->db->error();
+                    log_message('error', $userFriendlyErrMsg . PHP_EOL . $e->getMessage() . PHP_EOL . $query);
                     if (!empty($dbError['message'])) :
-                        log_message('error', $dbError['code'].' : '.$dbError['message']);
-                        $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
+                        log_message('error', $dbError['code'] . ' : ' . $dbError['message']);
+                        $result['error'] .= '<br><br>' . $dbError['code'] . ' : ' . $dbError['message'];
                     endif;
                 }
-
-            else:
+            else :
                 $successfulResult = false;
-                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected";
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
+            endif;
+
+            // if ($formValid && !$successfulResult && !is_numeric($country->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+            if ($formValid && !$successfulResult && $noException) :
+                $successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
             endif;
 
             $thenRedirect = true;
@@ -87,25 +101,25 @@ class CountriesController extends GoBaseController {
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
                         return redirect()->to(route_to($this->indexRoute))->with('successMessage', $message);
-                    else:
+                    else :
                         return $this->redirect2listView('successMessage', $message);
                     endif;
-                else:
+                else :
                     $this->viewData['successMessage'] = $message;
                 endif;
-            else:
-                if ($formValid) :
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
+            else :
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
                 endif;
                 if (!empty($result['error'])) :
-                  $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
-                else:
-                  $this->viewData['errorMessage'] .= '.';
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'] . '<br>' : '') . $result['error'];
                 endif;
             endif;
-        
+
         endif; // ($requestMethod === 'post')
-        
+
         $this->viewData['country'] = $country ?? new Country();
 
 
@@ -114,7 +128,8 @@ class CountriesController extends GoBaseController {
         $this->displayForm(__METHOD__);
     }
 
-    public function edit($requestedId = null) {
+    public function edit($requestedId = null)
+    {
 
         if ($requestedId == null) :
             return $this->redirect2listView();
@@ -136,24 +151,40 @@ class CountriesController extends GoBaseController {
                 $sanitizationResult = goSanitize($v);
                 $sanitizedData[$k] = $sanitizationResult[0];
             endforeach;
-        
-            if ($this->request->getPost('enabled') == null ) {
+
+            if ($this->request->getPost('enabled') == null) {
                 $sanitizedData['enabled'] = false;
             }
 
-        
+
+            $noException = true; // for now
+
             $formValid = $this->canValidate();
-            $successfulResult = false; // for now
 
             if ($formValid) :
                 try {
                     $successfulResult = $this->primaryModel->update($id, $sanitizedData);
                 } catch (\Exception $e) {
-                    $query = $this->primaryModel->db->getLastQuery();
+                    $noException = false;
+                    $successfulResult = false;
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
                     $dbError = $this->primaryModel->db->error();
-                    log_message('error', 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to update the ' . static::$singularObjectName . ' with ISO Code ' . $id . ' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL . 'There is an existing ' . static::$singularObjectName . ' on our database with the same data.';
+                    endif;
+                    $result['error'] = $userFriendlyErrMsg;
+                    log_message('error', $userFriendlyErrMsg . PHP_EOL . $e->getMessage() . PHP_EOL . $query);
+                    if (!empty($dbError['message'])) :
+                        log_message('error', $dbError['code'] . ' : ' . $dbError['message']);
+                        $result['error'] .= '<br><br>' . $dbError['code'] . ' : ' . $dbError['message'];
+                    endif;
                 }
+            else :
+                $successfulResult = false;
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
+
             $country = $country->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
@@ -167,29 +198,31 @@ class CountriesController extends GoBaseController {
                 if ($thenRedirect) :
                     if (!empty($this->indexRoute)) :
                         return redirect()->to(route_to($this->indexRoute))->with('successMessage', $message);
-                    else:
+                    else :
                         return $this->redirect2listView('successMessage', $message);
                     endif;
-                else:
+                else :
                     $this->viewData['successMessage'] = $message;
                 endif;
-            else: // ($successfulResult == false)
-                if ($formValid) {
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
-                }
+            else : // ($successfulResult == false)
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
+                endif;
                 if (!empty($result['error'])) :
-                    $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'] . '<br>' : '') . $result['error'];
                 endif;
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
         $this->viewData['country'] = $country;
 
-        
-        $theId = $id;
-		$this->viewData['formAction'] = route_to('updateCountry', $theId);
 
-        
+        $theId = $id;
+        $this->viewData['formAction'] = route_to('updateCountry', $theId);
+
+
         $this->displayForm(__METHOD__, $id);
     } // function edit(...)
 }

@@ -29,7 +29,7 @@
 								<th>Active</th>
 								<th>Score</th>
 								<th>Created on</th>
-								<th>Last Modified</th>
+								<th>Last Modified on</th>
 								<th class="text-nowrap">Action</th>
 							</tr>
 						</thead>
