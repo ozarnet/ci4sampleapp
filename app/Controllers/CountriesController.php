@@ -82,7 +82,7 @@ class CountriesController extends GoBaseController {
 
             // if ($formValid && !$successfulResult && !is_numeric($country->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
 			if ($formValid && !$successfulResult && $noException) :
-			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
+			    $successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
 			endif;
 
             $thenRedirect = true;

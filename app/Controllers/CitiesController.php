@@ -27,9 +27,9 @@ class CitiesController extends GoBaseResourceController {
     protected $indexRoute = 'cities';
     
     protected $formValidationRules = [
-    		'city_name' => 'trim|required|max_length[60]',
+        'city_name' => 'trim|required|max_length[60]',
 		'country_code' => 'trim',
-		];
+    ];
     
     public function index() {
         if ($this->request->isAJAX()) {
@@ -80,7 +80,6 @@ class CitiesController extends GoBaseResourceController {
         
                 $city = new \App\Entities\City($sanitizedData);
                 
-        
                 $noException = true;
         
                 $formValid = $this->canValidate();
@@ -110,9 +109,9 @@ class CitiesController extends GoBaseResourceController {
                 endif;
         
                 // if ($formValid && !$successfulResult && !is_numeric($city->{$this->model->getPrimaryKeyName()}) && $noException) :
-			if ($formValid && !$successfulResult && $noException) :
-    			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
-			endif;
+                if ($formValid && !$successfulResult && $noException) :
+                    $successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
+                endif;
         
                 $thenRedirect = true;
         
@@ -183,10 +182,9 @@ class CitiesController extends GoBaseResourceController {
                 endforeach;
         
                 if ($this->request->getPost('enabled') == null ) {
-$sanitizedData['enabled'] = false;
-}
+                    $sanitizedData['enabled'] = false;
+                }
 
-        
                 $noException = true; // for now
         
                 $formValid = $this->canValidate();
@@ -247,13 +245,11 @@ $sanitizedData['enabled'] = false;
             endif; // ($requestMethod === 'post')
         
             $this->viewData['city'] = $city;
-            		$this->viewData['countryList'] = $this->getCountryListItems();
+            $this->viewData['countryList'] = $this->getCountryListItems();
 
-        
             $theId = $id;
-		$this->viewData['formAction'] = route_to('updateCity', $theId);
+		    $this->viewData['formAction'] = route_to('updateCity', $theId);
 
-        
             $this->displayForm(__METHOD__, $id);
         } // function edit(...)
 
