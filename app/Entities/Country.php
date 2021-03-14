@@ -6,7 +6,7 @@ class Country extends GoBaseEntity
 	protected $attributes = [
 			'iso_code' => null,
 			'country_name' => null,
-			'enabled' => false,
+			'enabled' => true,
 			'updated_at' => null,
 		];
 	protected $casts = [

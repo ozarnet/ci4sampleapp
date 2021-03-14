@@ -22,16 +22,16 @@ class PeopleController extends GoBaseController {
     protected $indexRoute = 'people';
 
     protected $formValidationRules = [
-		'first_name' => 'trim|required|max_length[40]',
-		'person_type' => 'max_length[31]',
-		'birth_date' => 'valid_date|permit_empty',
 		'notes' => 'trim|max_length[16313]',
-		'score' => 'decimal|permit_empty',
-		'sex' => 'trim',
-		'last_name' => 'trim|required|max_length[50]',
+		'first_name' => 'trim|required|max_length[40]',
+		'birth_date' => 'valid_date|permit_empty',
 		'email_address' => 'trim|max_length[50]|valid_email|permit_empty',
-		'middle_name' => 'trim|max_length[40]',
+		'last_name' => 'trim|required|max_length[50]',
 		'phone_number' => 'trim|max_length[20]',
+		'sex' => 'trim',
+		'score' => 'decimal|permit_empty',
+		'middle_name' => 'trim|max_length[40]',
+		'person_type' => 'max_length[31]',
 		];
 
     public function index() {
@@ -61,6 +61,9 @@ class PeopleController extends GoBaseController {
             endforeach;
 
             $person = new Person($sanitizedData);
+            
+
+            $noException = true;
 
             $formValid = $this->canValidate();
             
@@ -68,22 +71,30 @@ class PeopleController extends GoBaseController {
                 try {
                     $successfulResult = $personModel->save($person);
                 } catch (\Exception $e) {
+                    $noException = false;
                     $successfulResult = false;
-                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database :';
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
+                    $dbError = $this->primaryModel->db->error();
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL.'There is an existing '.static::$singularObjectName.' on our database with the same data.';
+                    endif;
                     $result['error'] = $userFriendlyErrMsg;
-                    $query = $personModel->db->getLastQuery();
                     log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
-                    $dbError = $personModel->db->error();
                     if (!empty($dbError['message'])) :
                         log_message('error', $dbError['code'].' : '.$dbError['message']);
                         $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
                     endif;
                 }
-
             else:
                 $successfulResult = false;
-                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected";
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
+
+            // if ($formValid && !$successfulResult && !is_numeric($person->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+			if ($formValid && !$successfulResult && $noException) :
+			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
+			endif;
 
             $thenRedirect = true;
 
@@ -105,13 +116,13 @@ class PeopleController extends GoBaseController {
                     $this->viewData['successMessage'] = $message;
                 endif;
             else:
-                if ($formValid) :
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else:
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
                 endif;
                 if (!empty($result['error'])) :
-                  $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
-                else:
-                  $this->viewData['errorMessage'] .= '.';
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'].'<br>' : '') . $result['error'];
                 endif;
             endif;
         
@@ -119,8 +130,8 @@ class PeopleController extends GoBaseController {
         
         $this->viewData['person'] = $person ?? new Person();
 		$this->viewData['cityList'] = $this->getCityListItems();
-		$this->viewData['sexList'] = $this->getSexOptions();
 		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
+		$this->viewData['sexList'] = $this->getSexOptions();
 
 
         $this->viewData['formAction'] = route_to('createPerson');
@@ -156,18 +167,34 @@ class PeopleController extends GoBaseController {
             }
 
         
+            $noException = true; // for now
+        
             $formValid = $this->canValidate();
-            $successfulResult = false; // for now
 
             if ($formValid) :
                 try {
                     $successfulResult = $this->primaryModel->update($id, $sanitizedData);
                 } catch (\Exception $e) {
-                    $query = $this->primaryModel->db->getLastQuery();
+                    $noException = false;
+                    $successfulResult = false;
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
                     $dbError = $this->primaryModel->db->error();
-                    log_message('error', 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL.'There is an existing '.static::$singularObjectName.' on our database with the same data.';
+                    endif;
+                    $result['error'] = $userFriendlyErrMsg;
+                    log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
+                    if (!empty($dbError['message'])) :
+                        log_message('error', $dbError['code'].' : '.$dbError['message']);
+                        $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
+                    endif;
                 }
+            else:
+                $successfulResult = false;
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
+        
             $person = $person->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
@@ -188,19 +215,21 @@ class PeopleController extends GoBaseController {
                     $this->viewData['successMessage'] = $message;
                 endif;
             else: // ($successfulResult == false)
-                if ($formValid) {
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
-                }
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else:
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
+                endif;
                 if (!empty($result['error'])) :
-                    $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'].'<br>' : '') . $result['error'];
                 endif;
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
 
         $this->viewData['person'] = $person;
 		$this->viewData['cityList'] = $this->getCityListItems();
-		$this->viewData['sexList'] = $this->getSexOptions();
 		$this->viewData['personTypeList'] = $this->getPersonTypeOptions();
+		$this->viewData['sexList'] = $this->getSexOptions();
 
         
         $theId = $id;
@@ -220,17 +249,6 @@ class PeopleController extends GoBaseController {
 
 
 
-	protected function getSexOptions() { 
-		$sexOptions = [ 
-				'' => 'Please select...',
-				'F' => 'Female',
-				'M' => 'Male',
-			];
-		return $sexOptions;
-	}
-
-
-
 	protected function getPersonTypeOptions() { 
 		$personTypeOptions = [ 
 				'' => 'Please select...',
@@ -241,6 +259,17 @@ class PeopleController extends GoBaseController {
 				'friend' => 'friend',
 			];
 		return $personTypeOptions;
+	}
+
+
+
+	protected function getSexOptions() { 
+		$sexOptions = [ 
+				'' => 'Please select...',
+				'F' => 'Female',
+				'M' => 'Male',
+			];
+		return $sexOptions;
 	}
 
 

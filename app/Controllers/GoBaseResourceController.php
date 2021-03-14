@@ -202,7 +202,7 @@ abstract class GoBaseResourceController extends \CodeIgniter\RESTful\ResourceCon
             return true;
         }
 
-        $validationErrors = $this->formValidationErrors ?? null;;
+        $validationErrors = $this->formValidationErrors ?? null;
 
         $validation = \Config\Services::validation();
 

@@ -49,7 +49,10 @@ class CountriesController extends GoBaseController {
             endforeach;
 
             $country = new Country($sanitizedData);
-			$this->formValidationRules['country_name'] .= '|is_unique[tbl_countries.country_name]';
+            $this->formValidationRules['country_name'] .= '|is_unique[tbl_countries.country_name]';
+
+
+            $noException = true;
 
             $formValid = $this->canValidate();
             
@@ -57,22 +60,30 @@ class CountriesController extends GoBaseController {
                 try {
                     $successfulResult = $countryModel->insert($country);
                 } catch (\Exception $e) {
+                    $noException = false;
                     $successfulResult = false;
-                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database :';
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
+                    $dbError = $this->primaryModel->db->error();
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to save a new '.static::$singularObjectName.' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL.'There is an existing '.static::$singularObjectName.' on our database with the same data.';
+                    endif;
                     $result['error'] = $userFriendlyErrMsg;
-                    $query = $countryModel->db->getLastQuery();
                     log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
-                    $dbError = $countryModel->db->error();
                     if (!empty($dbError['message'])) :
                         log_message('error', $dbError['code'].' : '.$dbError['message']);
                         $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
                     endif;
                 }
-
             else:
                 $successfulResult = false;
-                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected";
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
+
+            // if ($formValid && !$successfulResult && !is_numeric($country->{$this->primaryModel->getPrimaryKeyName()}) && $noException) :
+			if ($formValid && !$successfulResult && $noException) :
+			$successfulResult = true; // Work around CodeIgniter bug returning falsy value from insert operation in case of alpha-numeric PKs
+			endif;
 
             $thenRedirect = true;
 
@@ -94,13 +105,13 @@ class CountriesController extends GoBaseController {
                     $this->viewData['successMessage'] = $message;
                 endif;
             else:
-                if ($formValid) :
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else:
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
                 endif;
                 if (!empty($result['error'])) :
-                  $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
-                else:
-                  $this->viewData['errorMessage'] .= '.';
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'].'<br>' : '') . $result['error'];
                 endif;
             endif;
         
@@ -142,18 +153,34 @@ class CountriesController extends GoBaseController {
             }
 
         
+            $noException = true; // for now
+        
             $formValid = $this->canValidate();
-            $successfulResult = false; // for now
 
             if ($formValid) :
                 try {
                     $successfulResult = $this->primaryModel->update($id, $sanitizedData);
                 } catch (\Exception $e) {
-                    $query = $this->primaryModel->db->getLastQuery();
+                    $noException = false;
+                    $successfulResult = false;
+                    $query = $this->primaryModel->db->getLastQuery()->getQuery();
                     $dbError = $this->primaryModel->db->error();
-                    log_message('error', 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ID '.$id.' to the database :'.PHP_EOL.$e->getMessage().PHP_EOL.$query.PHP_EOL.$dbError['code'].' : '.$dbError['message']);
+                    $userFriendlyErrMsg = 'An error occurred in an attempt to update the '.static::$singularObjectName.' with ISO Code '.$id.' to the database : ';
+                    if ($dbError['code'] == 1062) :
+                        $userFriendlyErrMsg .= PHP_EOL.'There is an existing '.static::$singularObjectName.' on our database with the same data.';
+                    endif;
+                    $result['error'] = $userFriendlyErrMsg;
+                    log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$query);
+                    if (!empty($dbError['message'])) :
+                        log_message('error', $dbError['code'].' : '.$dbError['message']);
+                        $result['error'] .= '<br><br>'.$dbError['code'].' : '.$dbError['message'];
+                    endif;
                 }
+            else:
+                $successfulResult = false;
+                $this->viewData['errorMessage'] .= "The errors on the form need to be corrected: ";
             endif;
+        
             $country = $country->mergeAttributes($sanitizedData);
 
             $thenRedirect = true;
@@ -174,11 +201,13 @@ class CountriesController extends GoBaseController {
                     $this->viewData['successMessage'] = $message;
                 endif;
             else: // ($successfulResult == false)
-                if ($formValid) {
-                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an error';
-                }
+                if (!$formValid) :
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved due to an erroneous value entered on the form. ';
+                else:
+                    $this->viewData['errorMessage'] .= 'The ' . strtolower(static::$singularObjectName) . ' was not saved because of an error. ';
+                endif;
                 if (!empty($result['error'])) :
-                    $this->viewData['errorMessage'] .= ':<br>' . $result['error'];
+                    $this->viewData['errorMessage'] = (!empty($this->viewData['errorMessage']) ? $this->viewData['errorMessage'].'<br>' : '') . $result['error'];
                 endif;
             endif; // ($successfulResult)
         endif; // ($requestMethod === 'post')
