@@ -1,7 +1,11 @@
-# Countries Cities People
+## Countries Cities People
 **A Sample CodeIgniter 4 web application created with [CodeIgniter Wizard](https://www.ozar.net/products) using the responsive Bootstrap4-based AdminLTE v3 template**
 
 This is a database-driven sample CodeIgniter 4 project generated with the 'CodeIgniter Wizard' Mac application. The source code is what you get from the CRUD code generator and has not been manually edited outside the wizard application for an accurate demonstration of the capabilities of the code generator, as well as the quality of the re-usable code it generates. 
+
+
+[See the Demo Web Application Online](https://www.ozar.net/products/codeigniterwizard/demowebapp/?r=github)
+
 
 ## What is CodeIgniter Wizard?
 
@@ -17,6 +21,10 @@ More information can be found at the [official site of CodeIgniter Wizard](https
 
 ### Grid View
 ![Grid View](screenshot2.png)
+
+
+[Visit the Live Demo Web Application Online](https://www.ozar.net/products/codeigniterwizard/demowebapp/?r=github)
+
 
 ### Underlying Database
 An SQL dump of the database is present at the root of the project. The current version is ccpv4.sql.
