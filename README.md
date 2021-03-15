@@ -3,6 +3,10 @@
 
 This is a database-driven sample CodeIgniter 4 project generated with the 'CodeIgniter Wizard' Mac application. The source code is what you get from the CRUD code generator and has not been manually edited outside the wizard application for an accurate demonstration of the capabilities of the code generator, as well as the quality of the re-usable code it generates. 
 
+
+[See the Demo Web Application Online](https://www.ozar.net/products/codeigniterwizard/demowebapp/?r=github)
+
+
 ## What is CodeIgniter Wizard?
 
 CodeIgniter Wizard is a Rapid Application Development utility which helps quickly generate an advanced starting point for MySQL/MariaDB database-driven web applications with administrative interfaces.
