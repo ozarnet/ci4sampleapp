@@ -10,7 +10,7 @@
             <a href="<?= route_to('/') ?>" class="nav-link">Home</a>
         </li>
         <li class="nav-item d-none d-sm-inline-block">
-            <a href="https://www.ozar.net/products/codeigniterwizard/sample/?r=uap411dm&layout=1&theme=alte304" class="nav-link">About</a>
+            <a href="https://www.ozar.net/products/codeigniterwizard/sample/?r=sampleappongh&f=ci411&layout=1&theme=alte304" class="nav-link">About</a>
         </li>
     </ul>
 
