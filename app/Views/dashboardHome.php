@@ -1,6 +1,8 @@
-<?= $this->include('Themes/_commonPartialsBs4/datatables') ?>
 <?= $this->extend('Themes/'.config('Basics')->theme['name'].'/AdminLayout/defaultLayout') ?>
 <?= $this->section('content');  ?>
+
+	<?=view('Themes/_commonPartialsBs/_alertBoxes') ?>
+
 
 	<!-- Info boxes -->
 	<div class="row">
@@ -8,13 +10,13 @@
 
 			<div class="small-box bg-info">
 				<div class="inner">
-					<h3><?= $totalNrOfCountries; ?></h3>
-					<p>Total Countries</p>
+					<h3><?= $totalNrOfCities; ?></h3>
+					<p><?=lang('Cities.cities') ?></p>
 				</div>
 				<div class="icon">
-					<i class="far fa-square"></i>
+					<i class="bi bi-asterisk"></i>
 				</div>
-				<?= anchor(route_to('countries'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+				<?= anchor(route_to('cityList'), lang('Basic.global.MoreInfo').'  <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 
 			</div><!-- /.small-box -->
 
@@ -23,13 +25,13 @@
 
 			<div class="small-box bg-success">
 				<div class="inner">
-					<h3><?= $totalNrOfCities; ?></h3>
-					<p>Total Cities</p>
+					<h3><?= $totalNrOfCountries; ?></h3>
+					<p><?=lang('Countries.countries') ?></p>
 				</div>
 				<div class="icon">
-					<i class="far fa-question-circle"></i>
+					<i class="bi bi-bookmarks-fill"></i>
 				</div>
-				<?= anchor(route_to('cities'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+				<?= anchor(route_to('countryList'), lang('Basic.global.MoreInfo').'  <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 
 			</div><!-- /.small-box -->
 
@@ -39,12 +41,12 @@
 			<div class="small-box bg-warning">
 				<div class="inner">
 					<h3><?= $totalNrOfPeople; ?></h3>
-					<p>Total People</p>
+					<p><?=lang('People.people') ?></p>
 				</div>
 				<div class="icon">
-					<i class="fas fa-chart-bar"></i>
+					<i class="bi bi-bar-chart-line"></i>
 				</div>
-				<?= anchor(route_to('people'), 'More info <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
+				<?= anchor(route_to('personList'), lang('Basic.global.MoreInfo').'  <i class="fas fa-arrow-circle-right"></i>', ['class'=>'small-box-footer']); ?>
 
 			</div><!-- /.small-box -->
 

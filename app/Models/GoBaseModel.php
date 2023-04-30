@@ -65,7 +65,7 @@ abstract class GoBaseModel extends Model {
      * @return int
      */
     public function getCount() {
-        $name = filter_var($this->table, FILTER_SANITIZE_STRING);
+        $name = $this->table;
         $count = $this->db->table($name)->countAll();
         return $count;
     }
@@ -172,6 +172,78 @@ abstract class GoBaseModel extends Model {
         }
 
         return $ciDropDownOptions;
+    }
+
+    /**
+     * @param array|string[] $columns2select
+     * @param null $resultSorting
+     * @param bool|bool $onlyActiveOnes
+     * @param null $searchStr
+     * @return array
+     */
+    public function getSelect2MenuItems(array $columns2select = ['id', 'designation'], $resultSorting=null, bool $onlyActiveOnes=true, $searchStr = null) {
+
+        $theseConditionsAreMet = [];
+
+        $id = $columns2select[0].' AS id';
+        $text = $columns2select[1].' AS text';
+
+        if (empty($resultSorting)) {
+            $resultSorting = $this->getPrimaryKeyName();
+        }
+
+        if ($onlyActiveOnes) {
+            if ( in_array('enabled', $this->allowedFields) ) {
+                $theseConditionsAreMet['enabled'] = true;
+            } elseif (in_array('active', $this->allowedFields)) {
+                $theseConditionsAreMet['active'] = true;
+            }
+        }
+
+        $queryBuilder = $this->db->table($this->table);
+        $queryBuilder->select([$id, $text]);
+        $queryBuilder->where($theseConditionsAreMet);
+        if (!empty($searchStr)) {
+            $queryBuilder->groupStart()
+                ->like($columns2select[0], $searchStr)
+                ->orLike($columns2select[1], $searchStr)
+                ->groupEnd();
+        }
+        $queryBuilder->orderBy($resultSorting);
+        $result =  $queryBuilder->get()->getResult();
+
+        return $result;
+    }
+
+     /**
+     * Custom method allowing you to add a form validation rule to the model on-the-fly
+     * @param string $fieldName
+     * @param string $rule
+     * @param string|null $msg
+     */
+    public function addValidationRule(string $fieldName, string $rule, string $msg = null ) {
+        if (empty(trim($fieldName)) ||empty(trim($fieldName))) {
+            return;
+        }
+        if (!isset($this->validationRules[$fieldName]) || empty($this->validationRules[$fieldName])) {
+            $this->validationRules[$fieldName] = substr($rule, 0, 1) == '|' ? substr($rule, 1) : trim($rule);
+        } else if (isset($this->validationRules[$fieldName]['rules'])) {
+            $this->validationRules[$fieldName]['rules'] .= substr($rule, 0, 1) == '|' ? trim($rule) : '|' . trim($rule);
+        } else {
+            $this->validationRules[$fieldName] .= $rule;
+        }
+        if (isset($msg) && !empty(trim($msg))) {
+            $ruleKey = strtok($rule, '[');
+            if ($ruleKey === false) {
+                return;
+            }
+            $item = [$ruleKey => "'".$msg."'"];
+            if (!isset($this->validationMessages[$fieldName]) || empty(trim($this->validationMessages[$fieldName]))) {
+                $this->validationMessages[$fieldName] = $item;
+            } else {
+                $this->validationMessages[$fieldName][$ruleKey] = "'".$msg."'";
+            }
+        }
     }
 
 }

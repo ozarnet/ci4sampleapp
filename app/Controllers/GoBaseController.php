@@ -76,6 +76,11 @@ abstract class GoBaseController extends Controller {
      */
     protected static $pluralObjectName;
 
+    /** 
+     * Singular object name in camel case
+     */
+    protected static $singularObjectNameCc = 'record';
+
     /**
      * Current error message to obtain from session flash data
      * 
@@ -115,7 +120,7 @@ abstract class GoBaseController extends Controller {
      *
      * @var array
      */
-    protected $helpers = ['session', 'go_common']; 
+    protected $helpers = ['session', 'go_common', 'text']; 
 
     public static $queries = [];
 
@@ -138,7 +143,7 @@ abstract class GoBaseController extends Controller {
 
         if ($this->usePageSubTitle) {
             $this->pageSubTitle = config('Basics')->appName;
-            $this->viewData['pageSubTitle'] = ' in '.$this->pageSubTitle;
+            $this->viewData['pageSubTitle'] = ' '.$this->pageSubTitle;
         }
         $this->viewData['errorMessage'] = $this->session->getFlashdata('errorMessage');
         $this->viewData['successMessage'] = $this->session->getFlashdata('successMessage');
@@ -157,7 +162,11 @@ abstract class GoBaseController extends Controller {
         if (!empty(static::$primaryModelName)) {
             $primaryModel = model(static::$primaryModelName, true);
             $this->primaryModel = $primaryModel;
+            $this->model = &$this->primaryModel;
         }
+        
+        $this->viewData['currentLocale'] = $this->request->getLocale();
+
     }
 
     public function index() {
@@ -178,6 +187,12 @@ abstract class GoBaseController extends Controller {
         echo view($viewFilePath, $this->viewData);
     }
 
+    /**
+     * Convenience method to display the form of a module
+     * @param $forMethod
+     * @param null $objId
+     * @return string
+     */
     protected function displayForm($forMethod, $objId = null) {
 
         helper('form');
@@ -211,7 +226,7 @@ abstract class GoBaseController extends Controller {
 
         $viewFilePath = static::$viewPath . 'view' . ucfirst(static::$singularObjectNameCc) . 'Form';
 
-        echo view($viewFilePath, $this->viewData);
+        return view($viewFilePath, $this->viewData);
     }
 
     protected function redirect2listView($flashDataKey = null, $flashDataValue = null) {
@@ -261,7 +276,7 @@ abstract class GoBaseController extends Controller {
             else:
                 $onlyAlphaNumeric = true;
                 $fromGetRequest = true;
-                $idSanitization = goSanitize($requestedId, $onlyAlphaNumeric, $fromGetRequest); // filter_var(trim($requestedId), FILTER_SANITIZE_STRING);
+                $idSanitization = goSanitize($requestedId, $onlyAlphaNumeric, $fromGetRequest); // filter_var(trim($requestedId), FILTER_SANITIZE_FULL_SPECIAL_CHARS);
                 $id = $idSanitization[0];
             endif;
         else:
@@ -292,55 +307,118 @@ abstract class GoBaseController extends Controller {
 
         $ar = $this->primaryModel->db->affectedRows();
         
-        $dbError = $this->primaryModel->db->error();
-        if (!empty($dbError['message'])) {
-            // var_dump($countryModel->db->error());
-            log_message('error', $this->primaryModel->db->error());
+        try {
+            $dbError = $this->primaryModel->db->error();
+        } catch (\Exception $e2) {
+            if ($e2->getMessage() != "Trying to get property 'errno' of non-object") {
+               log_message('error', $e2->getCode() . ' : ' . $e2->getMessage()) ;
+            }
+        }
+        if (isset($dbError['code']) && isset($dbError['message'])) {
+            log_message('error', $dbError['code'].' '.$dbError['message']);
+        } else {
+            $dbError = ['code' => '', 'message'=>''];
         }
 
         $result = ['persisted'=>$ar>0, 'ar'=>$ar, 'persistedId'=>null, 'affectedRows'=>$ar, 'errorCode'=>$dbError['code'], 'error'=>$dbError['message']];
         
+        $nameOfDeletedObject = static::$singularObjectNameCc;
+        
         if ($ar < 1) :
-            $errorMessage = 'No ' . static::$singularObjectName . ' was deleted now, because it probably had already been deleted.';
-            return $this->redirect2listView('errorMessage', $errorMessage);
+            $errorMessage = lang('Basic.global.deleteError', [$nameOfDeletedObject]); // 'No ' . static::$singularObjectName . ' was deleted now, because it probably had already been deleted.';
+            $fdKey = isset($this->viewData['usingSweetAlert'] ) && $this->viewData['usingSweetAlert'] ? 'sweet-error' : 'errorMessage';
+            $errorMessage = str_replace("'", "\'", $errorMessage);
+            return $this->redirect2listView($fdKey, str_replace("'", '', $errorMessage));
         else:
-            $message = 'The ' . static::$singularObjectName . ' was successfully deleted.';
-            
+            $message = lang('Basic.global.deleteSuccess', [$nameOfDeletedObject]); // 'The ' . static::$singularObjectName . ' was successfully deleted.';
+            $fdKey = isset($this->viewData['usingSweetAlert'] ) && $this->viewData['usingSweetAlert'] ? 'sweet-success' : 'successMessage';
             if ($result['affectedRows']>1) :
                 log_message('warning', "More than one row has been deleted in attempt to delete row for object named '".(static::$singularObjectName ?? 'unknown')."' with id: $id");
             endif;
-            return $this->redirect2listView('successMessage', $message);
+            $message = str_replace("'", "\'", $message);
+            return $this->redirect2listView($fdKey, $message);
         endif;
 
-        var_dump("BaseController.delete(...) fell into a black hole here.");
     }
 
-    protected function canValidate() {
-        
-        $validationRules = $this->formValidationRules ?? null;
-        
+   /**
+     * Convenience method to validate form submission
+     * @return bool
+     */
+    protected function canValidate()
+    {
+
+        $validationRules = $this->model->validationRules ?? $this->formValidationRules ?? null;
+
         if ($validationRules == null) {
             return true;
         }
-        
-        $validationErrors = $this->formValidationErrors ?? null;
 
-        $validation =  \Config\Services::validation();
-        
-        // $validation->setRules($validationRules, $validationErrors)
+        $validationErrorMessages = $this->model->validationMessages ??  $this->formValidationErrorMessagess ?? null;;
 
-        if ($validationErrors!=null) {
-            $valid = $this->validate($validationRules, $validationErrors);
+        if ($validationErrorMessages != null) {
+            $valid = $this->validate($validationRules, $validationErrorMessages);
         } else {
             $valid = $this->validate($validationRules);
         }
+        
+        $this->validationErrors = $valid ? '' : $this->validator->getErrors();
 
-        /* // As of version 1.1.5 of CodeIgniter Wizard, the following is replaced by custom validation errors template supported by CodeIgniter 4 
+        /*
+        // As of version 1.1.5 of CodeIgniter Wizard, the following is replaced by custom validation errors template supported by CodeIgniter 4
+        // If you are not using Bootstrap templates, however, you might want to uncomment this block...
+        $validation =  \Config\Services::validation();
+        $this->validation = $validation;
         if (!$valid) {
             $this->viewData['errorMessage'] .= $validation->listErrors();
         }
         */
         return $valid;
+    }
+
+    /**
+     * Method for post(ed) input sanitization. Override this when you have custom transformation needs, etc.
+     * @param array|null $postData
+     * @return array
+     */
+    protected function sanitized(array $postData = null, bool $nullIfEmpty = false) {
+        if ($postData == null) {
+            $postData = $this->request->getPost();
+        }
+        $sanitizedData = [];
+        foreach ($postData as $k => $v) {
+            if ($k == csrf_token()) {
+                continue;
+            }
+            $sanitizationResult = goSanitize($v, $nullIfEmpty);
+            $sanitizedData[$k] = $sanitizationResult[0];
+        }
+        return $sanitizedData;
+    }
+
+    /**
+     * Convenience method for common exception handling
+     * @param \Exception $e
+     */
+    protected function dealWithException(\Exception $e) {
+        // using another try / catch block to prevent to avoid CodeIgniter bug throwing trivial exceptions for querying DB errors
+        try {
+            $query = $this->model->db->getLastQuery();
+            $queryStr = !is_null($query) ? $query->getQuery() : '';
+            $dbError = $this->model->db->error();
+            $userFriendlyErrMsg = lang('Basic.global.persistErr1', [static::$singularObjectNameCc]);
+            if (isset($dbError['code']) && $dbError['code'] == 1062) :
+                $userFriendlyErrMsg .= PHP_EOL.lang('Basic.global.persistDuplErr', [static::$singularObjectNameCc]);
+            endif;
+            // $userFriendlyErrMsg = str_replace("'", "\'", $userFriendlyErrMsg); // Uncomment if experiencing unescaped single quote errors
+            log_message('error', $userFriendlyErrMsg.PHP_EOL.$e->getMessage().PHP_EOL.$queryStr);
+            if (isset($dbError['message']) && !empty($dbError['message'])) :
+                log_message('error', $dbError['code'].' : '.$dbError['message']);
+            endif;
+            $this->viewData['errorMessage'] = $userFriendlyErrMsg;
+        } catch (\Exception $e2) {
+            log_message('debug', 'You can probably safely ignore this: In attempt to check DB errors, CodeIgniter threw: '.PHP_EOL.$e2->getMessage());
+        }
     }
 
     // Collect the queries so something can be done with them later.

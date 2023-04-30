@@ -20,7 +20,7 @@ More information can be found at the [official site of CodeIgniter Wizard](https
 ![Adding / Editing a new record](screenshot1.png)
 
 ### Grid View
-![Grid View](screenshot2.png)
+![Grid View](screenshot2.jpg)
 
 
 [Visit the Live Demo Web Application Online](https://www.ozar.net/products/codeigniterwizard/demowebapp/?r=github)

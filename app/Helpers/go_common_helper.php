@@ -1,6 +1,6 @@
 <?php
 
-function goSanitize($var, bool $nullIfEmpty = true, bool $allowTags = false, bool $allowJs = false, bool $onlyAlphaNumeric = false, bool $fromGetRequest = false) {
+function goSanitize($var, bool $nullIfEmpty = false, bool $allowTags = false, bool $allowJs = false, bool $onlyAlphaNumeric = false, bool $fromGetRequest = false) {
     
     $malScore = 0;
     
@@ -52,7 +52,7 @@ function goSanitize($var, bool $nullIfEmpty = true, bool $allowTags = false, boo
             $str1 = urldecode ($str1);
         }
 
-        // $finalVal = filter_var($str1, FILTER_SANITIZE_STRING); // doesn't play well with esc() and old() as well as form_textarea() functions of CI 4 
+        // $finalVal = filter_var($str1, FILTER_SANITIZE_FULL_SPECIAL_CHARS); // doesn't play well with esc() and old() as well as form_textarea() functions of CI 4 
         $finalVal = $str1; 
     }
     return [trim($finalVal),$malScore];
