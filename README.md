@@ -32,7 +32,7 @@ An SQL dump of the database is present at the root of the project. The current v
 ## Video of the End-to-End Demo of Making of this App
 [![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
 
-[Watch on YouTube](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+[Watch on YouTube](https://www.youtube.com/watch?v=tsVWGOzBRQQ)
 
 
 ## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
@@ -48,7 +48,7 @@ An SQL dump of the database is present at the root of the project. The current v
 [Watch on YouTube](https://www.youtube.com/watch?v=UK7zPZlUkZg)
 
 ### Database E-R Diagram
-![Database E-R Diagram](NavicatModelScreenshot.png)
+![Database E-R Diagram](NavicatModelScreenShot.png)
 
 A [tutorial](https://www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action/) for designing the relational data model in Navicat and then exporting (DDL of) it to a database can be found at [www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action](https://www.arclerit.com/blog/new-data-modeling-capabilities-of-navicat-15-in-action/?r=github%p=ozarnet)
 
