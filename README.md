@@ -30,9 +30,9 @@ More information can be found at the [official site of CodeIgniter Wizard](https
 An SQL dump of the database is present at the root of the project. The current version is ccpv4.sql.
 
 ## Video of the End-to-End Demo of Making of this App
-[![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=fo2wmzZ2p3I)
+[![CodeIgniter Wizard](videodemoscreenshot.jpg)](https://www.youtube.com/watch?v=zInvLFw_yFc)
 
-[Watch on YouTube](https://www.youtube.com/watch?v=tsVWGOzBRQQ)
+[Watch on YouTube](https://www.youtube.com/watch?v=zInvLFw_yFc)
 
 
 ## Installing a local feature-rich PHP development environment for Mac Users (using Homebrew)
